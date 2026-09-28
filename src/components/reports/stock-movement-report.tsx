@@ -6,7 +6,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { ExportCsvButton } from "@/components/reports/export-csv-button";
+import { ExportButtons } from "@/components/reports/export-buttons";
 import { TRANSACTION_TYPE_LABELS } from "@/lib/types/transaction";
 import { formatQuantity } from "@/lib/utils";
 import type { TransactionListRow } from "@/lib/queries/transactions";
@@ -34,7 +34,7 @@ export function StockMovementReport({
         <p className="text-sm text-muted-foreground">
           {transactions.length} transactions
         </p>
-        <ExportCsvButton rows={csvRows} filename="stock-movement.csv" />
+        <ExportButtons rows={csvRows} filename="stock-movement" />
       </div>
       <div className="rounded-md border">
         <Table>

@@ -7,7 +7,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { ExportCsvButton } from "@/components/reports/export-csv-button";
+import { ExportButtons } from "@/components/reports/export-buttons";
 import { formatCurrency, formatQuantity } from "@/lib/utils";
 import type { ReturnListRow } from "@/lib/queries/returns";
 
@@ -31,7 +31,7 @@ export function ReturnsReport({ returns }: { returns: ReturnListRow[] }) {
     <div className="space-y-2">
       <div className="flex items-center justify-between">
         <p className="text-sm text-muted-foreground">{returns.length} returns</p>
-        <ExportCsvButton rows={csvRows} filename="returns.csv" />
+        <ExportButtons rows={csvRows} filename="returns" />
       </div>
       <div className="rounded-md border">
         <Table>

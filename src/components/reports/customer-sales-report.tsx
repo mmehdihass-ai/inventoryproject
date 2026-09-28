@@ -7,7 +7,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { ExportCsvButton } from "@/components/reports/export-csv-button";
+import { ExportButtons } from "@/components/reports/export-buttons";
 import { formatCurrency, formatNumber } from "@/lib/utils";
 import type { CustomerSalesRow } from "@/lib/queries/reports";
 
@@ -22,7 +22,7 @@ export function CustomerSalesReport({ rows }: { rows: CustomerSalesRow[] }) {
     <div className="space-y-2">
       <div className="flex items-center justify-between">
         <p className="text-sm text-muted-foreground">{rows.length} customers</p>
-        <ExportCsvButton rows={csvRows} filename="customer-sales.csv" />
+        <ExportButtons rows={csvRows} filename="customer-sales" />
       </div>
       <div className="rounded-md border">
         <Table>

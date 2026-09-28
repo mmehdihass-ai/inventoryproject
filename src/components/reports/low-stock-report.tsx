@@ -8,7 +8,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { ExportCsvButton } from "@/components/reports/export-csv-button";
+import { ExportButtons } from "@/components/reports/export-buttons";
 import { STOCK_STATUS_LABELS } from "@/lib/inventory";
 import { formatQuantity, formatNumber } from "@/lib/utils";
 import type { ProductWithStock } from "@/lib/queries/products";
@@ -35,7 +35,7 @@ export function LowStockReport({ products }: { products: ProductWithStock[] }) {
         <p className="text-sm text-muted-foreground">
           {products.length} products at or below reorder level
         </p>
-        <ExportCsvButton rows={csvRows} filename="low-stock.csv" />
+        <ExportButtons rows={csvRows} filename="low-stock" />
       </div>
       <div className="rounded-md border">
         <Table>
