@@ -11,6 +11,8 @@ export type SaleListRow = Sale & {
 export type SaleListFilters = {
   search?: string;
   customerId?: string;
+  dateFrom?: string;
+  dateTo?: string;
 };
 
 export async function listSales(
@@ -31,6 +33,12 @@ export async function listSales(
   }
   if (filters.customerId) {
     query = query.eq("customer_id", filters.customerId);
+  }
+  if (filters.dateFrom) {
+    query = query.gte("sale_date", filters.dateFrom);
+  }
+  if (filters.dateTo) {
+    query = query.lte("sale_date", filters.dateTo);
   }
 
   const { data, error } = await query;

@@ -18,6 +18,8 @@ export type ReturnListRow = Return & {
 export type ReturnListFilters = {
   search?: string;
   customerId?: string;
+  dateFrom?: string;
+  dateTo?: string;
 };
 
 export async function listReturns(
@@ -38,6 +40,12 @@ export async function listReturns(
   }
   if (filters.customerId) {
     query = query.eq("customer_id", filters.customerId);
+  }
+  if (filters.dateFrom) {
+    query = query.gte("return_date", filters.dateFrom);
+  }
+  if (filters.dateTo) {
+    query = query.lte("return_date", filters.dateTo);
   }
 
   const { data, error } = await query;
