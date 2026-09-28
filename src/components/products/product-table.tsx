@@ -9,9 +9,17 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { ProductPhoto } from "@/components/products/product-photo";
-import type { Product } from "@/lib/types/product";
+import { STOCK_STATUS_LABELS } from "@/lib/inventory";
+import { formatQuantity } from "@/lib/utils";
+import type { ProductWithStock } from "@/lib/queries/products";
 
-export function ProductTable({ products }: { products: Product[] }) {
+const STOCK_STATUS_VARIANT = {
+  IN_STOCK: "secondary",
+  LOW_STOCK: "outline",
+  OUT_OF_STOCK: "destructive",
+} as const;
+
+export function ProductTable({ products }: { products: ProductWithStock[] }) {
   if (products.length === 0) {
     return (
       <div className="rounded-md border border-dashed p-10 text-center text-sm text-muted-foreground">
@@ -30,7 +38,9 @@ export function ProductTable({ products }: { products: Product[] }) {
             <TableHead>Description</TableHead>
             <TableHead>Specification</TableHead>
             <TableHead>Category</TableHead>
-            <TableHead>Unit</TableHead>
+            <TableHead className="text-right">Stock PCS</TableHead>
+            <TableHead className="text-right">Stock BOX</TableHead>
+            <TableHead className="text-right">Stock SQM</TableHead>
             <TableHead>Status</TableHead>
           </TableRow>
         </TableHeader>
@@ -65,10 +75,18 @@ export function ProductTable({ products }: { products: Product[] }) {
                   .join(" · ") || "—"}
               </TableCell>
               <TableCell>{product.category ?? "—"}</TableCell>
-              <TableCell>{product.unit}</TableCell>
+              <TableCell className="text-right">
+                {formatQuantity(product.stockPcs)}
+              </TableCell>
+              <TableCell className="text-right text-muted-foreground">
+                {formatQuantity(product.stockCarton)}
+              </TableCell>
+              <TableCell className="text-right text-muted-foreground">
+                {formatQuantity(product.stockSqm)}
+              </TableCell>
               <TableCell>
-                <Badge variant={product.active ? "secondary" : "outline"}>
-                  {product.active ? "Active" : "Inactive"}
+                <Badge variant={STOCK_STATUS_VARIANT[product.stockStatus]}>
+                  {STOCK_STATUS_LABELS[product.stockStatus]}
                 </Badge>
               </TableCell>
             </TableRow>

@@ -3,7 +3,14 @@ import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { InventoryFilters } from "@/components/products/inventory-filters";
 import { ProductTable } from "@/components/products/product-table";
-import { listCategories, listProducts } from "@/lib/queries/products";
+import { listCategories, listProductsWithStock } from "@/lib/queries/products";
+import type { StockStatus } from "@/lib/inventory";
+
+const STOCK_STATUS_VALUES: StockStatus[] = [
+  "IN_STOCK",
+  "LOW_STOCK",
+  "OUT_OF_STOCK",
+];
 
 export default async function InventoryPage(props: PageProps<"/inventory">) {
   const searchParams = await props.searchParams;
@@ -15,13 +22,19 @@ export default async function InventoryPage(props: PageProps<"/inventory">) {
       : undefined;
   const status =
     typeof searchParams.status === "string" ? searchParams.status : undefined;
+  const stockParam =
+    typeof searchParams.stock === "string" ? searchParams.stock : undefined;
+  const stockStatus = STOCK_STATUS_VALUES.includes(stockParam as StockStatus)
+    ? (stockParam as StockStatus)
+    : undefined;
 
   const [products, categories] = await Promise.all([
-    listProducts({
+    listProductsWithStock({
       search,
       category,
       active:
         status === "active" ? true : status === "inactive" ? false : undefined,
+      stockStatus,
     }),
     listCategories(),
   ]);

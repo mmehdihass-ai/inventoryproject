@@ -1,0 +1,172 @@
+"use client";
+
+import { useState } from "react";
+import { useForm, Controller } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
+import { SlidersHorizontal } from "lucide-react";
+
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Field } from "@/components/ui/form-field";
+import { createAdjustment } from "@/lib/actions/transactions";
+import {
+  adjustmentFormSchema,
+  type AdjustmentFormValues,
+} from "@/lib/validation/transaction";
+import type { Product } from "@/lib/types/product";
+
+function today() {
+  return new Date().toISOString().slice(0, 10);
+}
+
+function defaultValues(): AdjustmentFormValues {
+  return {
+    transaction_date: today(),
+    product_id: "",
+    direction: "IN",
+    quantity: "",
+    reason: "",
+    notes: "",
+  };
+}
+
+export function AdjustmentDialog({ products }: { products: Product[] }) {
+  const router = useRouter();
+  const [open, setOpen] = useState(false);
+  const [formError, setFormError] = useState<string | null>(null);
+
+  const {
+    register,
+    control,
+    handleSubmit,
+    reset,
+    formState: { errors, isSubmitting },
+  } = useForm<AdjustmentFormValues>({
+    resolver: zodResolver(adjustmentFormSchema),
+    defaultValues: defaultValues(),
+  });
+
+  async function onSubmit(values: AdjustmentFormValues) {
+    setFormError(null);
+    const result = await createAdjustment(values);
+    if ("error" in result) {
+      setFormError(result.error);
+      return;
+    }
+    toast.success("Adjustment recorded");
+    reset(defaultValues());
+    setOpen(false);
+    router.refresh();
+  }
+
+  return (
+    <Dialog
+      open={open}
+      onOpenChange={(next) => {
+        setOpen(next);
+        if (!next) {
+          reset(defaultValues());
+          setFormError(null);
+        }
+      }}
+    >
+      <DialogTrigger render={<Button variant="outline" size="sm" />}>
+        <SlidersHorizontal className="h-4 w-4" />
+        Adjustment
+      </DialogTrigger>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle>Inventory adjustment</DialogTitle>
+        </DialogHeader>
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+          <div className="grid grid-cols-2 gap-3">
+            <Field label="Direction">
+              <Controller
+                control={control}
+                name="direction"
+                render={({ field }) => (
+                  <Select value={field.value} onValueChange={field.onChange}>
+                    <SelectTrigger className="w-full">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="IN">Increase stock</SelectItem>
+                      <SelectItem value="OUT">Decrease stock</SelectItem>
+                    </SelectContent>
+                  </Select>
+                )}
+              />
+            </Field>
+            <Field label="Date" error={errors.transaction_date?.message}>
+              <Input type="date" {...register("transaction_date")} />
+            </Field>
+          </div>
+
+          <Field label="Product" error={errors.product_id?.message}>
+            <Controller
+              control={control}
+              name="product_id"
+              render={({ field }) => (
+                <Select value={field.value} onValueChange={field.onChange}>
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Select a product" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {products.map((product) => (
+                      <SelectItem key={product.id} value={product.id}>
+                        {product.sku} — {product.description}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
+            />
+          </Field>
+
+          <Field label="Quantity (PCS)" error={errors.quantity?.message}>
+            <Input inputMode="decimal" {...register("quantity")} />
+          </Field>
+
+          <Field label="Reason" error={errors.reason?.message}>
+            <Input
+              placeholder="e.g. Physical count correction"
+              {...register("reason")}
+            />
+          </Field>
+
+          <Field label="Notes">
+            <Textarea rows={2} {...register("notes")} />
+          </Field>
+
+          {formError && (
+            <p className="text-sm text-destructive">{formError}</p>
+          )}
+
+          <DialogFooter>
+            <Button type="submit" disabled={isSubmitting}>
+              {isSubmitting ? "Saving..." : "Save"}
+            </Button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+}

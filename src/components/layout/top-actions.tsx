@@ -1,20 +1,23 @@
 "use client";
 
-import { PackagePlus, ShoppingCart, Undo2, SlidersHorizontal } from "lucide-react";
+import { ShoppingCart, Undo2 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import { StockInDialog } from "@/components/transactions/stock-in-dialog";
+import { AdjustmentDialog } from "@/components/transactions/adjustment-dialog";
+import type { Product } from "@/lib/types/product";
 
-const ACTIONS = [
-  { label: "Stock In", icon: PackagePlus, phase: "Phase 3" },
+const PLACEHOLDER_ACTIONS = [
   { label: "New Sale", icon: ShoppingCart, phase: "Phase 4" },
   { label: "Return", icon: Undo2, phase: "Phase 5" },
-  { label: "Adjustment", icon: SlidersHorizontal, phase: "Phase 3" },
 ] as const;
 
-export function TopActions() {
+export function TopActions({ products }: { products: Product[] }) {
   return (
     <div className="flex items-center gap-2">
-      {ACTIONS.map((action) => {
+      <StockInDialog products={products} />
+      <AdjustmentDialog products={products} />
+      {PLACEHOLDER_ACTIONS.map((action) => {
         const Icon = action.icon;
         return (
           <Button

@@ -11,6 +11,15 @@ export function formatNumber(value: number | null | undefined): string {
   return numberFormatter.format(value)
 }
 
+const quantityFormatter = new Intl.NumberFormat("en-AE", {
+  maximumFractionDigits: 2,
+})
+
+export function formatQuantity(value: number | null | undefined): string {
+  if (value === null || value === undefined) return "—"
+  return quantityFormatter.format(value)
+}
+
 export function formatCurrency(value: number | null | undefined): string {
   if (value === null || value === undefined) return "—"
   return currencyFormatter.format(value)

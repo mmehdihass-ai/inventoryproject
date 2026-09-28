@@ -69,6 +69,23 @@ export function InventoryFilters({ categories }: { categories: string[] }) {
       </Select>
 
       <Select
+        value={searchParams.get("stock") ?? "all"}
+        onValueChange={(value) =>
+          updateParam("stock", value === "all" ? null : value)
+        }
+      >
+        <SelectTrigger className="w-40">
+          <SelectValue placeholder="All stock levels" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="all">All stock levels</SelectItem>
+          <SelectItem value="IN_STOCK">In stock</SelectItem>
+          <SelectItem value="LOW_STOCK">Low stock</SelectItem>
+          <SelectItem value="OUT_OF_STOCK">Out of stock</SelectItem>
+        </SelectContent>
+      </Select>
+
+      <Select
         value={searchParams.get("status") ?? "all"}
         onValueChange={(value) =>
           updateParam("status", value === "all" ? null : value)

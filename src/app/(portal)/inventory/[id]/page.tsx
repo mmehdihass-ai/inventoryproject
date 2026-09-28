@@ -4,9 +4,21 @@ import { Pencil } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { ProductPhoto } from "@/components/products/product-photo";
 import { getProductById } from "@/lib/queries/products";
-import { formatCurrency, formatNumber } from "@/lib/utils";
+import { getCurrentStock } from "@/lib/queries/stock";
+import { listProductLedger } from "@/lib/queries/transactions";
+import { computeStockConversions, STOCK_STATUS_LABELS } from "@/lib/inventory";
+import { TRANSACTION_TYPE_LABELS } from "@/lib/types/transaction";
+import { formatCurrency, formatNumber, formatQuantity } from "@/lib/utils";
 
 const CONVERSION_FIELDS: Array<{
   key: "pcs_per_carton" | "kg_per_carton" | "kg_per_pallet" | "sqm_per_carton";
@@ -18,6 +30,12 @@ const CONVERSION_FIELDS: Array<{
   { key: "sqm_per_carton", label: "SQM / carton" },
 ];
 
+const STOCK_STATUS_VARIANT = {
+  IN_STOCK: "secondary",
+  LOW_STOCK: "outline",
+  OUT_OF_STOCK: "destructive",
+} as const;
+
 export default async function ProductDetailPage(
   props: PageProps<"/inventory/[id]">,
 ) {
@@ -28,6 +46,12 @@ export default async function ProductDetailPage(
     notFound();
   }
 
+  const [stockPcs, ledger] = await Promise.all([
+    getCurrentStock(id),
+    listProductLedger(id),
+  ]);
+
+  const stock = computeStockConversions(product, stockPcs);
   const conversions = CONVERSION_FIELDS.filter(
     (field) => product[field.key] !== null,
   );
@@ -63,6 +87,36 @@ export default async function ProductDetailPage(
       </div>
 
       <Card>
+        <CardContent className="flex flex-wrap items-center gap-6 pt-6">
+          <div>
+            <p className="text-xs text-muted-foreground">Current stock</p>
+            <p className="text-2xl font-semibold tracking-tight">
+              {formatQuantity(stock.stockPcs)} PCS
+            </p>
+          </div>
+          {stock.stockCarton !== null && (
+            <div>
+              <p className="text-xs text-muted-foreground">Cartons</p>
+              <p className="text-lg font-medium">
+                {formatQuantity(stock.stockCarton)}
+              </p>
+            </div>
+          )}
+          {stock.stockSqm !== null && (
+            <div>
+              <p className="text-xs text-muted-foreground">SQM</p>
+              <p className="text-lg font-medium">
+                {formatQuantity(stock.stockSqm)}
+              </p>
+            </div>
+          )}
+          <Badge variant={STOCK_STATUS_VARIANT[stock.status]}>
+            {STOCK_STATUS_LABELS[stock.status]}
+          </Badge>
+        </CardContent>
+      </Card>
+
+      <Card>
         <CardContent className="grid grid-cols-2 gap-4 pt-6 sm:grid-cols-3">
           <Detail label="Category" value={product.category ?? "—"} />
           <Detail
@@ -72,8 +126,14 @@ export default async function ProductDetailPage(
           <Detail label="Colour" value={product.colour ?? "—"} />
           <Detail label="Model number" value={product.model_number ?? "—"} />
           <Detail label="Unit" value={product.unit} />
-          <Detail label="Reorder level" value={formatNumber(product.reorder_level)} />
-          <Detail label="Cost price" value={formatCurrency(product.cost_price)} />
+          <Detail
+            label="Reorder level"
+            value={formatNumber(product.reorder_level)}
+          />
+          <Detail
+            label="Cost price"
+            value={formatCurrency(product.cost_price)}
+          />
           <Detail
             label="Selling price"
             value={formatCurrency(product.selling_price)}
@@ -103,12 +163,50 @@ export default async function ProductDetailPage(
         </Card>
       )}
 
-      <Card>
-        <CardContent className="pt-6 text-sm text-muted-foreground">
-          Current inventory and transaction history arrive in Phase 3, once
-          the transaction ledger is built.
-        </CardContent>
-      </Card>
+      <div className="space-y-2">
+        <h2 className="text-lg font-semibold tracking-tight">
+          Transaction history
+        </h2>
+        {ledger.length === 0 ? (
+          <div className="rounded-md border border-dashed p-10 text-center text-sm text-muted-foreground">
+            No transactions yet.
+          </div>
+        ) : (
+          <div className="rounded-md border">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Date</TableHead>
+                  <TableHead>Type</TableHead>
+                  <TableHead>Reference</TableHead>
+                  <TableHead className="text-right">Quantity</TableHead>
+                  <TableHead className="text-right">Balance</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {ledger.map((entry) => (
+                  <TableRow key={entry.id}>
+                    <TableCell>{entry.transaction_date}</TableCell>
+                    <TableCell>
+                      {TRANSACTION_TYPE_LABELS[entry.transaction_type]}
+                    </TableCell>
+                    <TableCell className="text-muted-foreground">
+                      {entry.reference_number ?? entry.reason ?? "—"}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      {entry.quantity > 0 ? "+" : ""}
+                      {formatQuantity(entry.quantity)}
+                    </TableCell>
+                    <TableCell className="text-right font-medium">
+                      {formatQuantity(entry.running_balance)}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
