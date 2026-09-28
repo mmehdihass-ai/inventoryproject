@@ -25,6 +25,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { SearchableSelect } from "@/components/ui/searchable-select";
 import { Field } from "@/components/ui/form-field";
 import { createAdjustment } from "@/lib/actions/transactions";
 import {
@@ -32,6 +33,11 @@ import {
   type AdjustmentFormValues,
 } from "@/lib/validation/transaction";
 import type { Product } from "@/lib/types/product";
+
+const DIRECTION_ITEMS = [
+  { value: "IN", label: "Increase stock" },
+  { value: "OUT", label: "Decrease stock" },
+];
 
 function today() {
   return new Date().toISOString().slice(0, 10);
@@ -52,6 +58,10 @@ export function AdjustmentDialog({ products }: { products: Product[] }) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
+  const productItems = products.map((product) => ({
+    value: product.id,
+    label: `${product.sku} — ${product.description}`,
+  }));
 
   const {
     register,
@@ -103,7 +113,11 @@ export function AdjustmentDialog({ products }: { products: Product[] }) {
                 control={control}
                 name="direction"
                 render={({ field }) => (
-                  <Select value={field.value} onValueChange={field.onChange}>
+                  <Select
+                    items={DIRECTION_ITEMS}
+                    value={field.value}
+                    onValueChange={field.onChange}
+                  >
                     <SelectTrigger className="w-full">
                       <SelectValue />
                     </SelectTrigger>
@@ -125,18 +139,12 @@ export function AdjustmentDialog({ products }: { products: Product[] }) {
               control={control}
               name="product_id"
               render={({ field }) => (
-                <Select value={field.value} onValueChange={field.onChange}>
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Select a product" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {products.map((product) => (
-                      <SelectItem key={product.id} value={product.id}>
-                        {product.sku} — {product.description}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <SearchableSelect
+                  items={productItems}
+                  value={field.value}
+                  onValueChange={field.onChange}
+                  placeholder="Search for a product..."
+                />
               )}
             />
           </Field>

@@ -13,6 +13,12 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
+const STATUS_ITEMS = [
+  { value: "all", label: "All customers" },
+  { value: "active", label: "Active" },
+  { value: "inactive", label: "Inactive" },
+];
+
 export function CustomerFilters() {
   const router = useRouter();
   const pathname = usePathname();
@@ -50,6 +56,7 @@ export function CustomerFilters() {
       </form>
 
       <Select
+        items={STATUS_ITEMS}
         value={searchParams.get("status") ?? "all"}
         onValueChange={(value) =>
           updateParam("status", value === "all" ? null : value)

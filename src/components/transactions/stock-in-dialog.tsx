@@ -25,6 +25,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { SearchableSelect } from "@/components/ui/searchable-select";
 import { Field } from "@/components/ui/form-field";
 import { createStockIn } from "@/lib/actions/transactions";
 import {
@@ -32,6 +33,11 @@ import {
   type StockInFormValues,
 } from "@/lib/validation/transaction";
 import type { Product } from "@/lib/types/product";
+
+const TRANSACTION_TYPE_ITEMS = [
+  { value: "STOCK_IN", label: "Stock in" },
+  { value: "OPENING_STOCK", label: "Opening stock" },
+];
 
 function today() {
   return new Date().toISOString().slice(0, 10);
@@ -54,6 +60,10 @@ export function StockInDialog({ products }: { products: Product[] }) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
+  const productItems = products.map((product) => ({
+    value: product.id,
+    label: `${product.sku} — ${product.description}`,
+  }));
 
   const {
     register,
@@ -105,7 +115,11 @@ export function StockInDialog({ products }: { products: Product[] }) {
                 control={control}
                 name="transaction_type"
                 render={({ field }) => (
-                  <Select value={field.value} onValueChange={field.onChange}>
+                  <Select
+                    items={TRANSACTION_TYPE_ITEMS}
+                    value={field.value}
+                    onValueChange={field.onChange}
+                  >
                     <SelectTrigger className="w-full">
                       <SelectValue />
                     </SelectTrigger>
@@ -129,18 +143,12 @@ export function StockInDialog({ products }: { products: Product[] }) {
               control={control}
               name="product_id"
               render={({ field }) => (
-                <Select value={field.value} onValueChange={field.onChange}>
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Select a product" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {products.map((product) => (
-                      <SelectItem key={product.id} value={product.id}>
-                        {product.sku} — {product.description}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <SearchableSelect
+                  items={productItems}
+                  value={field.value}
+                  onValueChange={field.onChange}
+                  placeholder="Search for a product..."
+                />
               )}
             />
           </Field>

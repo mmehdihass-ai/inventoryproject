@@ -30,6 +30,14 @@ export function SalesFilters({ customers }: { customers: Customer[] }) {
     router.push(params.size ? `${pathname}?${params.toString()}` : pathname);
   }
 
+  const customerItems = [
+    { value: "all", label: "All customers" },
+    ...customers.map((customer) => ({
+      value: customer.id,
+      label: customer.customer_name,
+    })),
+  ];
+
   return (
     <div className="flex flex-wrap items-center gap-2">
       <form
@@ -51,6 +59,7 @@ export function SalesFilters({ customers }: { customers: Customer[] }) {
       </form>
 
       <Select
+        items={customerItems}
         value={searchParams.get("customer") ?? "all"}
         onValueChange={(value) =>
           updateParam("customer", value === "all" ? null : value)

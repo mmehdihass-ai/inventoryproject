@@ -17,13 +17,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { SearchableSelect } from "@/components/ui/searchable-select";
 import { Field } from "@/components/ui/form-field";
 import { createSale } from "@/lib/actions/sales";
 import { saleFormSchema, type SaleFormValues } from "@/lib/validation/sale";
@@ -76,6 +70,15 @@ export function NewSaleSheet({
   const { fields, append, remove } = useFieldArray({ control, name: "lines" });
   const lines = watch("lines");
 
+  const customerItems = customers.map((customer) => ({
+    value: customer.id,
+    label: customer.customer_name,
+  }));
+  const productItems = products.map((product) => ({
+    value: product.id,
+    label: `${product.sku} — ${product.description}`,
+  }));
+
   function productFor(id: string) {
     return products.find((p) => p.id === id);
   }
@@ -122,23 +125,17 @@ export function NewSaleSheet({
             <Field label="Sale date" error={errors.sale_date?.message}>
               <Input type="date" {...register("sale_date")} />
             </Field>
-            <Field label="Customer" error={errors.customer_id?.message}>
+            <Field label="Customer Name" error={errors.customer_id?.message}>
               <Controller
                 control={control}
                 name="customer_id"
                 render={({ field }) => (
-                  <Select value={field.value} onValueChange={field.onChange}>
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Select a customer" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {customers.map((customer) => (
-                        <SelectItem key={customer.id} value={customer.id}>
-                          {customer.customer_name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <SearchableSelect
+                    items={customerItems}
+                    value={field.value}
+                    onValueChange={field.onChange}
+                    placeholder="Search for a customer..."
+                  />
                 )}
               />
             </Field>
@@ -184,10 +181,10 @@ export function NewSaleSheet({
                         control={control}
                         name={`lines.${index}.product_id`}
                         render={({ field: selectField }) => (
-                          <Select
+                          <SearchableSelect
+                            items={productItems}
                             value={selectField.value}
                             onValueChange={(value) => {
-                              if (value === null) return;
                               selectField.onChange(value);
                               const product = productFor(value);
                               if (
@@ -200,18 +197,8 @@ export function NewSaleSheet({
                                 );
                               }
                             }}
-                          >
-                            <SelectTrigger className="w-full">
-                              <SelectValue placeholder="Select a product" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {products.map((product) => (
-                                <SelectItem key={product.id} value={product.id}>
-                                  {product.sku} — {product.description}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
+                            placeholder="Search for a product..."
+                          />
                         )}
                       />
                       {lineErrors?.product_id?.message && (

@@ -13,11 +13,28 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
+const STOCK_ITEMS = [
+  { value: "all", label: "All stock levels" },
+  { value: "IN_STOCK", label: "In stock" },
+  { value: "LOW_STOCK", label: "Low stock" },
+  { value: "OUT_OF_STOCK", label: "Out of stock" },
+];
+
+const STATUS_ITEMS = [
+  { value: "all", label: "All products" },
+  { value: "active", label: "Active" },
+  { value: "inactive", label: "Inactive" },
+];
+
 export function InventoryFilters({ categories }: { categories: string[] }) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const [search, setSearch] = useState(searchParams.get("search") ?? "");
+  const categoryItems = [
+    { value: "all", label: "All categories" },
+    ...categories.map((category) => ({ value: category, label: category })),
+  ];
 
   function updateParam(key: string, value: string | null) {
     const params = new URLSearchParams(searchParams.toString());
@@ -50,6 +67,7 @@ export function InventoryFilters({ categories }: { categories: string[] }) {
       </form>
 
       <Select
+        items={categoryItems}
         value={searchParams.get("category") ?? "all"}
         onValueChange={(value) =>
           updateParam("category", value === "all" ? null : value)
@@ -69,6 +87,7 @@ export function InventoryFilters({ categories }: { categories: string[] }) {
       </Select>
 
       <Select
+        items={STOCK_ITEMS}
         value={searchParams.get("stock") ?? "all"}
         onValueChange={(value) =>
           updateParam("stock", value === "all" ? null : value)
@@ -86,6 +105,7 @@ export function InventoryFilters({ categories }: { categories: string[] }) {
       </Select>
 
       <Select
+        items={STATUS_ITEMS}
         value={searchParams.get("status") ?? "all"}
         onValueChange={(value) =>
           updateParam("status", value === "all" ? null : value)
