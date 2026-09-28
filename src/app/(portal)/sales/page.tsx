@@ -1,10 +1,27 @@
-import { PagePlaceholder } from "@/components/layout/page-placeholder";
+import { SalesFilters } from "@/components/sales/sales-filters";
+import { SalesTable } from "@/components/sales/sales-table";
+import { listSales } from "@/lib/queries/sales";
+import { listCustomers } from "@/lib/queries/customers";
 
-export default function SalesPage() {
+export default async function SalesPage(props: PageProps<"/sales">) {
+  const searchParams = await props.searchParams;
+  const search =
+    typeof searchParams.search === "string" ? searchParams.search : undefined;
+  const customerId =
+    typeof searchParams.customer === "string"
+      ? searchParams.customer
+      : undefined;
+
+  const [sales, customers] = await Promise.all([
+    listSales({ search, customerId }),
+    listCustomers(),
+  ]);
+
   return (
-    <PagePlaceholder
-      title="Sales"
-      description="Sales history, invoices, and delivery notes arrive in Phase 4."
-    />
+    <div className="space-y-4">
+      <h1 className="text-2xl font-semibold tracking-tight">Sales</h1>
+      <SalesFilters customers={customers} />
+      <SalesTable sales={sales} />
+    </div>
   );
 }
