@@ -19,7 +19,7 @@ export const saleLineSchema = z.object({
 
 export const saleFormSchema = z.object({
   sale_date: z.string().min(1, "Date is required"),
-  customer_id: z.string().min(1, "Select a customer"),
+  customer_name: z.string().min(1, "Customer name is required"),
   invoice_number: z.string().min(1, "Invoice number is required"),
   delivery_note_number: z.string(),
   notes: z.string(),

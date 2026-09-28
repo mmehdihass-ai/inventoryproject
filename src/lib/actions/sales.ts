@@ -33,7 +33,7 @@ export async function createSale(
   }));
 
   const { data, error } = await supabase.rpc("fn_record_sale", {
-    p_customer_id: parsed.customer_id,
+    p_customer_name: parsed.customer_name.trim(),
     p_sale_date: parsed.sale_date,
     p_invoice_number: parsed.invoice_number.trim(),
     p_delivery_note_number: toNullable(parsed.delivery_note_number),

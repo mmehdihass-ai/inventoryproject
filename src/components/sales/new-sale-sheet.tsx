@@ -36,7 +36,7 @@ function emptyLine() {
 function defaultValues(): SaleFormValues {
   return {
     sale_date: today(),
-    customer_id: "",
+    customer_name: "",
     invoice_number: "",
     delivery_note_number: "",
     notes: "",
@@ -69,11 +69,14 @@ export function NewSaleSheet({
 
   const { fields, append, remove } = useFieldArray({ control, name: "lines" });
   const lines = watch("lines");
+  const customerName = watch("customer_name");
 
-  const customerItems = customers.map((customer) => ({
-    value: customer.id,
-    label: customer.customer_name,
-  }));
+  const matchedCustomer = customers.find(
+    (customer) =>
+      customer.customer_name.trim().toLowerCase() ===
+      customerName.trim().toLowerCase(),
+  );
+
   const productItems = products.map((product) => ({
     value: product.id,
     label: `${product.sku} — ${product.description}`,
@@ -125,19 +128,19 @@ export function NewSaleSheet({
             <Field label="Sale date" error={errors.sale_date?.message}>
               <Input type="date" {...register("sale_date")} />
             </Field>
-            <Field label="Customer Name" error={errors.customer_id?.message}>
-              <Controller
-                control={control}
-                name="customer_id"
-                render={({ field }) => (
-                  <SearchableSelect
-                    items={customerItems}
-                    value={field.value}
-                    onValueChange={field.onChange}
-                    placeholder="Search for a customer..."
-                  />
-                )}
+            <Field label="Customer Name" error={errors.customer_name?.message}>
+              <Input
+                placeholder="Type a customer name..."
+                autoComplete="off"
+                {...register("customer_name")}
               />
+              {customerName.trim() && (
+                <p className="text-xs text-muted-foreground">
+                  {matchedCustomer
+                    ? `Existing customer: ${matchedCustomer.customer_name}`
+                    : "New customer — will be added on save"}
+                </p>
+              )}
             </Field>
           </div>
 
