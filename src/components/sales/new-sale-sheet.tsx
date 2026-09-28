@@ -69,7 +69,7 @@ export function NewSaleSheet({
 
   const { fields, append, remove } = useFieldArray({ control, name: "lines" });
   const lines = watch("lines");
-  const customerName = watch("customer_name");
+  const customerName = watch("customer_name") ?? "";
 
   const matchedCustomer = customers.find(
     (customer) =>
