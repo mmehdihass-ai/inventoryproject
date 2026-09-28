@@ -1,23 +1,16 @@
-import { TopActions } from "@/components/layout/top-actions";
 import { UserMenu } from "@/components/layout/user-menu";
-import type { ProductWithStock } from "@/lib/queries/products";
-import type { Customer } from "@/lib/types/customer";
-import type { SalePickerRow } from "@/lib/queries/sales";
 
-export function TopBar({
-  email,
-  products,
-  customers,
-  sales,
-}: {
-  email: string;
-  products: ProductWithStock[];
-  customers: Customer[];
-  sales: SalePickerRow[];
-}) {
+const COMPANY_NAME = "AL Tareeq AL Sahal Building Materials Trading FZE";
+
+export function TopBar({ email }: { email: string }) {
   return (
-    <header className="flex h-16 items-center justify-between border-b bg-card px-6">
-      <TopActions products={products} customers={customers} sales={sales} />
+    <header className="flex h-16 items-center justify-between gap-4 border-b bg-card px-6">
+      <h1
+        className="min-w-0 truncate font-heading text-base font-semibold tracking-tight sm:text-lg"
+        title={COMPANY_NAME}
+      >
+        {COMPANY_NAME}
+      </h1>
       <UserMenu email={email} />
     </header>
   );

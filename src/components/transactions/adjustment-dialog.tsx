@@ -1,11 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { SlidersHorizontal } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -54,7 +53,15 @@ function defaultValues(): AdjustmentFormValues {
   };
 }
 
-export function AdjustmentDialog({ products }: { products: Product[] }) {
+export function AdjustmentDialog({
+  products,
+  trigger,
+  triggerClassName,
+}: {
+  products: Product[];
+  trigger: ReactNode;
+  triggerClassName?: string;
+}) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
@@ -98,10 +105,7 @@ export function AdjustmentDialog({ products }: { products: Product[] }) {
         }
       }}
     >
-      <DialogTrigger render={<Button variant="outline" size="sm" />}>
-        <SlidersHorizontal className="h-4 w-4" />
-        Adjustment
-      </DialogTrigger>
+      <DialogTrigger className={triggerClassName}>{trigger}</DialogTrigger>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>Inventory adjustment</DialogTitle>

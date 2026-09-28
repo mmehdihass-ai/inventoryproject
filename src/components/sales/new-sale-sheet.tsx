@@ -1,9 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import { useForm, useFieldArray, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ShoppingCart, Plus, Trash2 } from "lucide-react";
+import { Plus, Trash2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -47,9 +47,13 @@ function defaultValues(): SaleFormValues {
 export function NewSaleSheet({
   products,
   customers,
+  trigger,
+  triggerClassName,
 }: {
   products: ProductWithStock[];
   customers: Customer[];
+  trigger: ReactNode;
+  triggerClassName?: string;
 }) {
   const [open, setOpen] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
@@ -112,10 +116,7 @@ export function NewSaleSheet({
         }
       }}
     >
-      <SheetTrigger render={<Button variant="outline" size="sm" />}>
-        <ShoppingCart className="h-4 w-4" />
-        New Sale
-      </SheetTrigger>
+      <SheetTrigger className={triggerClassName}>{trigger}</SheetTrigger>
       <SheetContent side="right" className="w-full overflow-y-auto sm:max-w-xl">
         <SheetHeader>
           <SheetTitle>New sale</SheetTitle>

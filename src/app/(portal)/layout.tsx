@@ -28,14 +28,9 @@ export default async function PortalLayout({
 
   return (
     <div className="flex h-screen w-full overflow-hidden">
-      <Sidebar />
+      <Sidebar products={products} customers={customers} sales={sales} />
       <div className="flex flex-1 flex-col overflow-hidden">
-        <TopBar
-          email={user.email ?? ""}
-          products={products}
-          customers={customers}
-          sales={sales}
-        />
+        <TopBar email={user.email ?? ""} />
         <main className="flex-1 overflow-y-auto p-8">{children}</main>
       </div>
     </div>

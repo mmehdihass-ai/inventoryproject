@@ -1,11 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { Undo2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -61,10 +60,14 @@ export function ReturnDialog({
   customers,
   sales,
   products,
+  trigger,
+  triggerClassName,
 }: {
   customers: Customer[];
   sales: SalePickerRow[];
   products: ProductWithStock[];
+  trigger: ReactNode;
+  triggerClassName?: string;
 }) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
@@ -169,10 +172,7 @@ export function ReturnDialog({
         }
       }}
     >
-      <DialogTrigger render={<Button variant="outline" size="sm" />}>
-        <Undo2 className="h-4 w-4" />
-        Return
-      </DialogTrigger>
+      <DialogTrigger className={triggerClassName}>{trigger}</DialogTrigger>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>Return</DialogTitle>
