@@ -24,3 +24,13 @@ export function formatCurrency(value: number | null | undefined): string {
   if (value === null || value === undefined) return "—"
   return currencyFormatter.format(value)
 }
+
+const compactNumberFormatter = new Intl.NumberFormat("en-AE", {
+  notation: "compact",
+  maximumFractionDigits: 1,
+})
+
+export function formatCompactNumber(value: number | null | undefined): string {
+  if (value === null || value === undefined) return "—"
+  return compactNumberFormatter.format(value)
+}
