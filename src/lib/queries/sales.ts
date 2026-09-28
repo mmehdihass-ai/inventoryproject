@@ -38,6 +38,22 @@ export async function listSales(
   return data as unknown as SaleListRow[];
 }
 
+export type SalePickerRow = Pick<
+  Sale,
+  "id" | "invoice_number" | "sale_date" | "customer_id"
+>;
+
+export async function listSalesForPicker(): Promise<SalePickerRow[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("sales")
+    .select("id, invoice_number, sale_date, customer_id")
+    .order("sale_date", { ascending: false });
+
+  if (error) throw error;
+  return data;
+}
+
 export type SaleDetail = Sale & {
   customer: Customer | null;
   items: Array<

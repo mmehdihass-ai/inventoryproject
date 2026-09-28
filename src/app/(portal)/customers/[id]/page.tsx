@@ -3,8 +3,10 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { CustomerFormDialog } from "@/components/customers/customer-form-dialog";
 import { SalesTable } from "@/components/sales/sales-table";
+import { ReturnsTable } from "@/components/returns/returns-table";
 import { getCustomerById } from "@/lib/queries/customers";
 import { listSales } from "@/lib/queries/sales";
+import { listReturns } from "@/lib/queries/returns";
 import { formatCurrency } from "@/lib/utils";
 
 export default async function CustomerDetailPage(
@@ -17,7 +19,10 @@ export default async function CustomerDetailPage(
     notFound();
   }
 
-  const sales = await listSales({ customerId: id });
+  const [sales, returns] = await Promise.all([
+    listSales({ customerId: id }),
+    listReturns({ customerId: id }),
+  ]);
   const totalSales = sales.reduce((sum, sale) => sum + sale.total_amount, 0);
 
   return (
@@ -63,11 +68,12 @@ export default async function CustomerDetailPage(
         <SalesTable sales={sales} showCustomer={false} />
       </div>
 
-      <Card>
-        <CardContent className="pt-6 text-sm text-muted-foreground">
-          Returns arrive in Phase 5.
-        </CardContent>
-      </Card>
+      <div className="space-y-2">
+        <h2 className="font-heading text-lg font-semibold tracking-tight">
+          Returns
+        </h2>
+        <ReturnsTable returns={returns} showCustomer={false} />
+      </div>
     </div>
   );
 }
