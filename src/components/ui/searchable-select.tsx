@@ -33,6 +33,7 @@ export function SearchableSelect({
     <Combobox
       items={items}
       value={selected}
+      autoHighlight
       onValueChange={(next) =>
         onValueChange(next ? (next as SearchableSelectItem).value : "")
       }
