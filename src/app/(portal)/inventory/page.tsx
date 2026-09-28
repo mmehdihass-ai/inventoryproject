@@ -30,7 +30,11 @@ export default async function InventoryPage(props: PageProps<"/inventory">) {
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-semibold tracking-tight">Inventory</h1>
-        <Button size="sm" render={<Link href="/inventory/new" />}>
+        <Button
+          size="sm"
+          nativeButton={false}
+          render={<Link href="/inventory/new" />}
+        >
           <Plus className="h-4 w-4" />
           New product
         </Button>

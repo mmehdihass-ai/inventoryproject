@@ -54,6 +54,7 @@ export default async function ProductDetailPage(
         <Button
           variant="outline"
           size="sm"
+          nativeButton={false}
           render={<Link href={`/inventory/${product.id}/edit`} />}
         >
           <Pencil className="h-4 w-4" />
