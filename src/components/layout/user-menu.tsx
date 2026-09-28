@@ -7,6 +7,7 @@ import { buttonVariants } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
@@ -32,7 +33,9 @@ export function UserMenu({ email }: { email: string }) {
         {email}
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
-        <DropdownMenuLabel>Signed in</DropdownMenuLabel>
+        <DropdownMenuGroup>
+          <DropdownMenuLabel>Signed in</DropdownMenuLabel>
+        </DropdownMenuGroup>
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={handleLogout}>
           <LogOut className="h-4 w-4" />
