@@ -27,18 +27,22 @@ export function SearchableSelect({
   placeholder?: string;
   emptyText?: string;
 }) {
+  const selected = items.find((item) => item.value === value) ?? null;
+
   return (
     <Combobox
       items={items}
-      value={value || null}
-      onValueChange={(next) => onValueChange((next as string | null) ?? "")}
+      value={selected}
+      onValueChange={(next) =>
+        onValueChange(next ? (next as SearchableSelectItem).value : "")
+      }
     >
       <ComboboxInput placeholder={placeholder} />
       <ComboboxContent>
         <ComboboxEmpty>{emptyText}</ComboboxEmpty>
         <ComboboxList>
           {(item: SearchableSelectItem) => (
-            <ComboboxItem key={item.value} value={item.value}>
+            <ComboboxItem key={item.value} value={item}>
               {item.label}
             </ComboboxItem>
           )}
