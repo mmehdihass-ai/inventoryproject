@@ -1,0 +1,22 @@
+export type Product = {
+  id: string;
+  sku: string;
+  model_number: string | null;
+  description: string;
+  category: string | null;
+  size_specification: string | null;
+  colour: string | null;
+  unit: string;
+  pcs_per_carton: number | null;
+  kg_per_carton: number | null;
+  kg_per_pallet: number | null;
+  sqm_per_carton: number | null;
+  cost_price: number | null;
+  selling_price: number | null;
+  reorder_level: number;
+  photo_url: string | null;
+  notes: string | null;
+  active: boolean;
+  created_at: string;
+  updated_at: string;
+};
