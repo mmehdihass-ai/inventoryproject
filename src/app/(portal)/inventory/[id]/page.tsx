@@ -66,7 +66,7 @@ export default async function ProductDetailPage(
             size={72}
           />
           <div>
-            <h1 className="text-2xl font-semibold tracking-tight">
+            <h1 className="font-heading text-2xl font-semibold tracking-tight">
               {product.sku}
             </h1>
             <p className="text-muted-foreground">{product.description}</p>
@@ -90,7 +90,7 @@ export default async function ProductDetailPage(
         <CardContent className="flex flex-wrap items-center gap-6 pt-6">
           <div>
             <p className="text-xs text-muted-foreground">Current stock</p>
-            <p className="text-2xl font-semibold tracking-tight">
+            <p className="font-heading text-2xl font-semibold tracking-tight">
               {formatQuantity(stock.stockPcs)} PCS
             </p>
           </div>
@@ -164,7 +164,7 @@ export default async function ProductDetailPage(
       )}
 
       <div className="space-y-2">
-        <h2 className="text-lg font-semibold tracking-tight">
+        <h2 className="font-heading text-lg font-semibold tracking-tight">
           Transaction history
         </h2>
         {ledger.length === 0 ? (

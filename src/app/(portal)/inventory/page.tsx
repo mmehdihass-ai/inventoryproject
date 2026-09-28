@@ -42,7 +42,7 @@ export default async function InventoryPage(props: PageProps<"/inventory">) {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold tracking-tight">Inventory</h1>
+        <h1 className="font-heading text-2xl font-semibold tracking-tight">Inventory</h1>
         <Button
           size="sm"
           nativeButton={false}

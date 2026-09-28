@@ -19,7 +19,7 @@ export default async function CustomersPage(props: PageProps<"/customers">) {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold tracking-tight">Customers</h1>
+        <h1 className="font-heading text-2xl font-semibold tracking-tight">Customers</h1>
         <CustomerFormDialog />
       </div>
 

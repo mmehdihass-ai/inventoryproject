@@ -25,7 +25,7 @@ export default async function CustomerDetailPage(
       <div className="flex items-start justify-between">
         <div>
           <div className="flex items-center gap-2">
-            <h1 className="text-2xl font-semibold tracking-tight">
+            <h1 className="font-heading text-2xl font-semibold tracking-tight">
               {customer.customer_name}
             </h1>
             <Badge variant={customer.active ? "secondary" : "outline"}>
@@ -57,7 +57,7 @@ export default async function CustomerDetailPage(
       )}
 
       <div className="space-y-2">
-        <h2 className="text-lg font-semibold tracking-tight">
+        <h2 className="font-heading text-lg font-semibold tracking-tight">
           Purchase history
         </h2>
         <SalesTable sales={sales} showCustomer={false} />

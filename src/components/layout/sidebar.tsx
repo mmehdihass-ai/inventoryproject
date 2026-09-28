@@ -10,6 +10,7 @@ import {
   Users,
   History,
   FileBarChart,
+  Boxes,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -27,13 +28,16 @@ export function Sidebar() {
   const pathname = usePathname();
 
   return (
-    <aside className="hidden w-56 shrink-0 border-r bg-sidebar md:flex md:flex-col">
-      <div className="flex h-14 items-center border-b px-4">
-        <span className="text-sm font-semibold tracking-tight">
+    <aside className="hidden w-60 shrink-0 flex-col bg-sidebar text-sidebar-foreground md:flex">
+      <div className="flex h-16 items-center gap-2.5 px-5">
+        <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
+          <Boxes className="h-4 w-4" />
+        </span>
+        <span className="font-heading text-[1.05rem] font-semibold tracking-tight">
           Inventory Portal
         </span>
       </div>
-      <nav className="flex-1 space-y-1 p-2">
+      <nav className="flex-1 space-y-0.5 px-3 py-2">
         {NAV_ITEMS.map((item) => {
           const active =
             pathname === item.href || pathname.startsWith(item.href + "/");
@@ -43,18 +47,26 @@ export function Sidebar() {
               key={item.href}
               href={item.href}
               className={cn(
-                "flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition-colors",
+                "flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
                 active
                   ? "bg-sidebar-accent text-sidebar-accent-foreground"
-                  : "text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
+                  : "text-sidebar-foreground/65 hover:bg-sidebar-accent/60 hover:text-sidebar-accent-foreground",
               )}
             >
-              <Icon className="h-4 w-4" />
+              <Icon
+                className={cn(
+                  "h-4 w-4",
+                  active && "text-sidebar-primary",
+                )}
+              />
               {item.label}
             </Link>
           );
         })}
       </nav>
+      <div className="border-t border-sidebar-border px-5 py-3 text-xs text-sidebar-foreground/40">
+        Transaction-based inventory
+      </div>
     </aside>
   );
 }

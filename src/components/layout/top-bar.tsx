@@ -13,7 +13,7 @@ export function TopBar({
   customers: Customer[];
 }) {
   return (
-    <header className="flex h-14 items-center justify-between border-b bg-background px-4">
+    <header className="flex h-16 items-center justify-between border-b bg-card px-6">
       <TopActions products={products} customers={customers} />
       <UserMenu email={email} />
     </header>
