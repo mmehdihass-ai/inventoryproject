@@ -40,31 +40,31 @@ export default async function DashboardPage() {
 
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-3 xl:grid-cols-5">
         <KpiCard
-          label="Total stock"
+          label="Total Stock"
           value={`${formatQuantity(kpis.totalStockPcs)} PCS`}
           href="/inventory"
           icon={Boxes}
         />
         <KpiCard
-          label="Items sold today"
+          label="Items Sold Today"
           value={formatQuantity(kpis.itemsSoldToday)}
           href="/sales"
           icon={PackageCheck}
         />
         <KpiCard
-          label="Items sold this month"
+          label="Items Sold This Month"
           value={formatQuantity(kpis.itemsSoldThisMonth)}
           href="/sales"
           icon={CalendarCheck}
         />
         <KpiCard
-          label="Sales today"
+          label="Sales Today"
           value={formatCurrency(kpis.salesToday)}
           href="/sales"
           icon={ShoppingCart}
         />
         <KpiCard
-          label="Sales this month"
+          label="Sales This Month"
           value={formatCurrency(kpis.salesThisMonth)}
           href="/sales"
           icon={TrendingUp}
