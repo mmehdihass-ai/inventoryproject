@@ -47,79 +47,75 @@ export default async function ReturnDetailPage(
         </p>
       </div>
 
-      <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)]">
-        <div className="space-y-6">
-          <Card>
-            <CardContent className="grid grid-cols-2 gap-4 pt-6 sm:grid-cols-3 xl:grid-cols-1">
-              <Detail
-                label="Original invoice"
-                value={ret.original_sale?.invoice_number ?? "—"}
-              />
-              <Detail label="Reason" value={ret.reason ?? "—"} />
-              <Detail
-                label="Refund amount"
-                value={formatCurrency(ret.refund_amount)}
-              />
-            </CardContent>
-          </Card>
+      <Card>
+        <CardContent className="grid grid-cols-2 gap-4 pt-6 sm:grid-cols-3">
+          <Detail
+            label="Original invoice"
+            value={ret.original_sale?.invoice_number ?? "—"}
+          />
+          <Detail label="Reason" value={ret.reason ?? "—"} />
+          <Detail
+            label="Refund amount"
+            value={formatCurrency(ret.refund_amount)}
+          />
+        </CardContent>
+      </Card>
 
-          {ret.notes && (
-            <Card>
-              <CardContent className="pt-6">
-                <p className="text-sm text-muted-foreground">{ret.notes}</p>
-              </CardContent>
-            </Card>
-          )}
-        </div>
+      {ret.notes && (
+        <Card>
+          <CardContent className="pt-6">
+            <p className="text-sm text-muted-foreground">{ret.notes}</p>
+          </CardContent>
+        </Card>
+      )}
 
-        <div className="space-y-2">
-          <h2 className="font-heading text-lg font-semibold tracking-tight">
-            Items
-          </h2>
-          <div className="max-h-[600px] overflow-y-auto rounded-md border">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="w-14" />
-                  <TableHead>Item</TableHead>
-                  <TableHead className="text-right">Quantity</TableHead>
-                  <TableHead>Restocked</TableHead>
+      <div className="space-y-2">
+        <h2 className="font-heading text-lg font-semibold tracking-tight">
+          Items
+        </h2>
+        <div className="rounded-md border">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="w-14" />
+                <TableHead>Item</TableHead>
+                <TableHead className="text-right">Quantity</TableHead>
+                <TableHead>Restocked</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {ret.items.map((item) => (
+                <TableRow key={item.id}>
+                  <TableCell>
+                    <ProductPhoto
+                      src={item.product?.photo_url ?? null}
+                      alt={item.product?.description ?? ""}
+                    />
+                  </TableCell>
+                  <TableCell>
+                    {item.product ? (
+                      <Link
+                        href={`/inventory/${item.product.id}`}
+                        className="hover:underline"
+                      >
+                        {item.product.sku} — {item.product.description}
+                      </Link>
+                    ) : (
+                      "—"
+                    )}
+                  </TableCell>
+                  <TableCell className="text-right">
+                    {formatQuantity(item.quantity)}
+                  </TableCell>
+                  <TableCell>
+                    <Badge variant={item.restock ? "secondary" : "outline"}>
+                      {item.restock ? "Yes" : "No"}
+                    </Badge>
+                  </TableCell>
                 </TableRow>
-              </TableHeader>
-              <TableBody>
-                {ret.items.map((item) => (
-                  <TableRow key={item.id}>
-                    <TableCell>
-                      <ProductPhoto
-                        src={item.product?.photo_url ?? null}
-                        alt={item.product?.description ?? ""}
-                      />
-                    </TableCell>
-                    <TableCell>
-                      {item.product ? (
-                        <Link
-                          href={`/inventory/${item.product.id}`}
-                          className="hover:underline"
-                        >
-                          {item.product.sku} — {item.product.description}
-                        </Link>
-                      ) : (
-                        "—"
-                      )}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      {formatQuantity(item.quantity)}
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant={item.restock ? "secondary" : "outline"}>
-                        {item.restock ? "Yes" : "No"}
-                      </Badge>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
+              ))}
+            </TableBody>
+          </Table>
         </div>
       </div>
 

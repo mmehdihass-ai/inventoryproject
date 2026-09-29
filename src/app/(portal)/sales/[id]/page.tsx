@@ -46,88 +46,84 @@ export default async function SaleDetailPage(
         </p>
       </div>
 
-      <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)]">
-        <div className="space-y-6">
-          <Card>
-            <CardContent className="grid grid-cols-2 gap-4 pt-6 sm:grid-cols-3 xl:grid-cols-1">
-              <Detail
-                label="Delivery note"
-                value={sale.delivery_note_number ?? "—"}
-              />
-              <Detail
-                label="Discount total"
-                value={formatCurrency(sale.discount_total)}
-              />
-              <Detail
-                label="Sale total"
-                value={formatCurrency(sale.total_amount)}
-              />
-            </CardContent>
-          </Card>
+      <Card>
+        <CardContent className="grid grid-cols-2 gap-4 pt-6 sm:grid-cols-3">
+          <Detail
+            label="Delivery note"
+            value={sale.delivery_note_number ?? "—"}
+          />
+          <Detail
+            label="Discount total"
+            value={formatCurrency(sale.discount_total)}
+          />
+          <Detail
+            label="Sale total"
+            value={formatCurrency(sale.total_amount)}
+          />
+        </CardContent>
+      </Card>
 
-          {sale.notes && (
-            <Card>
-              <CardContent className="pt-6">
-                <p className="text-sm text-muted-foreground">{sale.notes}</p>
-              </CardContent>
-            </Card>
-          )}
-        </div>
+      {sale.notes && (
+        <Card>
+          <CardContent className="pt-6">
+            <p className="text-sm text-muted-foreground">{sale.notes}</p>
+          </CardContent>
+        </Card>
+      )}
 
-        <div className="space-y-2">
-          <h2 className="font-heading text-lg font-semibold tracking-tight">
-            Products
-          </h2>
-          <div className="max-h-[600px] overflow-y-auto rounded-md border">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="w-14" />
-                  <TableHead>Item</TableHead>
-                  <TableHead className="text-right">Quantity</TableHead>
-                  <TableHead className="text-right">Unit price</TableHead>
-                  <TableHead className="text-right">Discount</TableHead>
-                  <TableHead className="text-right">Line total</TableHead>
+      <div className="space-y-2">
+        <h2 className="font-heading text-lg font-semibold tracking-tight">
+          Products
+        </h2>
+        <div className="rounded-md border">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="w-14" />
+                <TableHead>Item</TableHead>
+                <TableHead className="text-right">Quantity</TableHead>
+                <TableHead className="text-right">Unit price</TableHead>
+                <TableHead className="text-right">Discount</TableHead>
+                <TableHead className="text-right">Line total</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {sale.items.map((item) => (
+                <TableRow key={item.id}>
+                  <TableCell>
+                    <ProductPhoto
+                      src={item.product?.photo_url ?? null}
+                      alt={item.product?.description ?? ""}
+                    />
+                  </TableCell>
+                  <TableCell>
+                    {item.product ? (
+                      <Link
+                        href={`/inventory/${item.product.id}`}
+                        className="hover:underline"
+                      >
+                        {item.product.sku} — {item.product.description}
+                      </Link>
+                    ) : (
+                      "—"
+                    )}
+                  </TableCell>
+                  <TableCell className="text-right">
+                    {formatQuantity(item.quantity)}
+                  </TableCell>
+                  <TableCell className="text-right">
+                    {formatCurrency(item.unit_price)}
+                  </TableCell>
+                  <TableCell className="text-right">
+                    {formatCurrency(item.discount)}
+                  </TableCell>
+                  <TableCell className="text-right font-medium">
+                    {formatCurrency(item.line_total)}
+                  </TableCell>
                 </TableRow>
-              </TableHeader>
-              <TableBody>
-                {sale.items.map((item) => (
-                  <TableRow key={item.id}>
-                    <TableCell>
-                      <ProductPhoto
-                        src={item.product?.photo_url ?? null}
-                        alt={item.product?.description ?? ""}
-                      />
-                    </TableCell>
-                    <TableCell>
-                      {item.product ? (
-                        <Link
-                          href={`/inventory/${item.product.id}`}
-                          className="hover:underline"
-                        >
-                          {item.product.sku} — {item.product.description}
-                        </Link>
-                      ) : (
-                        "—"
-                      )}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      {formatQuantity(item.quantity)}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      {formatCurrency(item.unit_price)}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      {formatCurrency(item.discount)}
-                    </TableCell>
-                    <TableCell className="text-right font-medium">
-                      {formatCurrency(item.line_total)}
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
+              ))}
+            </TableBody>
+          </Table>
         </div>
       </div>
 
