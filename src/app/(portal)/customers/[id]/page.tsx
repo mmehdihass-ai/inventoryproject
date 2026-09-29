@@ -1,5 +1,8 @@
+import Link from "next/link";
 import { notFound } from "next/navigation";
+import { ArrowLeft } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { CustomerFormDialog } from "@/components/customers/customer-form-dialog";
 import { SalesTable } from "@/components/sales/sales-table";
@@ -26,7 +29,7 @@ export default async function CustomerDetailPage(
   const totalSales = sales.reduce((sum, sale) => sum + sale.total_amount, 0);
 
   return (
-    <div className="max-w-3xl space-y-6">
+    <div className="space-y-6">
       <div className="flex items-start justify-between">
         <div>
           <div className="flex items-center gap-2">
@@ -45,7 +48,7 @@ export default async function CustomerDetailPage(
       </div>
 
       <Card>
-        <CardContent className="grid grid-cols-2 gap-4 pt-6 sm:grid-cols-3">
+        <CardContent className="grid grid-cols-2 gap-4 pt-6 sm:grid-cols-4">
           <Detail label="Phone" value={customer.phone ?? "—"} />
           <Detail label="Email" value={customer.email ?? "—"} />
           <Detail label="Address" value={customer.address ?? "—"} />
@@ -61,19 +64,35 @@ export default async function CustomerDetailPage(
         </Card>
       )}
 
-      <div className="space-y-2">
-        <h2 className="font-heading text-lg font-semibold tracking-tight">
-          Purchase history
-        </h2>
-        <SalesTable sales={sales} showCustomer={false} />
+      <div className="grid gap-6 xl:grid-cols-2">
+        <div className="space-y-2">
+          <h2 className="font-heading text-lg font-semibold tracking-tight">
+            Purchase history
+          </h2>
+          <div className="max-h-[600px] overflow-y-auto rounded-md">
+            <SalesTable sales={sales} showCustomer={false} />
+          </div>
+        </div>
+
+        <div className="space-y-2">
+          <h2 className="font-heading text-lg font-semibold tracking-tight">
+            Returns
+          </h2>
+          <div className="max-h-[600px] overflow-y-auto rounded-md">
+            <ReturnsTable returns={returns} showCustomer={false} />
+          </div>
+        </div>
       </div>
 
-      <div className="space-y-2">
-        <h2 className="font-heading text-lg font-semibold tracking-tight">
-          Returns
-        </h2>
-        <ReturnsTable returns={returns} showCustomer={false} />
-      </div>
+      <Button
+        variant="outline"
+        size="sm"
+        nativeButton={false}
+        render={<Link href="/customers" />}
+      >
+        <ArrowLeft className="h-4 w-4" />
+        Back to Customers
+      </Button>
     </div>
   );
 }

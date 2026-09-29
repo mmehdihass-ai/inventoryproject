@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Pencil } from "lucide-react";
+import { ArrowLeft, Pencil } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
@@ -57,7 +57,7 @@ export default async function ProductDetailPage(
   );
 
   return (
-    <div className="max-w-3xl space-y-6">
+    <div className="space-y-6">
       <div className="flex items-start justify-between">
         <div className="flex items-center gap-4">
           <ProductPhoto
@@ -111,127 +111,149 @@ export default async function ProductDetailPage(
         </Card>
       )}
 
-      <Card>
-        <CardContent className="flex flex-wrap items-center gap-6 pt-6">
-          <div>
-            <p className="text-xs text-muted-foreground">Current stock</p>
-            <p className="font-heading text-2xl font-semibold tracking-tight">
-              {formatQuantity(stock.stockPcs)} PCS
-            </p>
-          </div>
-          {stock.stockCarton !== null && (
-            <div>
-              <p className="text-xs text-muted-foreground">Cartons</p>
-              <p className="text-lg font-medium">
-                {formatQuantity(stock.stockCarton)}
-              </p>
-            </div>
-          )}
-          {stock.stockSqm !== null && (
-            <div>
-              <p className="text-xs text-muted-foreground">SQM</p>
-              <p className="text-lg font-medium">
-                {formatQuantity(stock.stockSqm)}
-              </p>
-            </div>
-          )}
-          <Badge variant={STOCK_STATUS_VARIANT[stock.status]}>
-            {STOCK_STATUS_LABELS[stock.status]}
-          </Badge>
-        </CardContent>
-      </Card>
+      <div className="grid gap-6 xl:grid-cols-2">
+        <div className="space-y-6">
+          <Card>
+            <CardContent className="flex flex-wrap items-center gap-6 pt-6">
+              <div>
+                <p className="text-xs text-muted-foreground">Current stock</p>
+                <p className="font-heading text-2xl font-semibold tracking-tight">
+                  {formatQuantity(stock.stockPcs)} PCS
+                </p>
+              </div>
+              {stock.stockCarton !== null && (
+                <div>
+                  <p className="text-xs text-muted-foreground">Cartons</p>
+                  <p className="text-lg font-medium">
+                    {formatQuantity(stock.stockCarton)}
+                  </p>
+                </div>
+              )}
+              {stock.stockSqm !== null && (
+                <div>
+                  <p className="text-xs text-muted-foreground">SQM</p>
+                  <p className="text-lg font-medium">
+                    {formatQuantity(stock.stockSqm)}
+                  </p>
+                </div>
+              )}
+              <Badge variant={STOCK_STATUS_VARIANT[stock.status]}>
+                {STOCK_STATUS_LABELS[stock.status]}
+              </Badge>
+            </CardContent>
+          </Card>
 
-      <Card>
-        <CardContent className="grid grid-cols-2 gap-4 pt-6 sm:grid-cols-3">
-          <Detail label="Product Category" value={product.category ?? "—"} />
-          <Detail
-            label="Size/Dimension"
-            value={product.size_specification ?? "—"}
-          />
-          <Detail label="Colour" value={product.colour ?? "—"} />
-          <Detail label="Model number" value={product.model_number ?? "—"} />
-          <Detail label="Unit" value={product.unit} />
-          <Detail
-            label="Reorder level"
-            value={formatNumber(product.reorder_level)}
-          />
-          <Detail
-            label="Cost price"
-            value={formatCurrency(product.cost_price)}
-          />
-          <Detail
-            label="Selling price"
-            value={formatCurrency(product.selling_price)}
-          />
-        </CardContent>
-      </Card>
-
-      {conversions.length > 0 && (
-        <Card>
-          <CardContent className="grid grid-cols-2 gap-4 pt-6 sm:grid-cols-4">
-            {conversions.map((field) => (
+          <Card>
+            <CardContent className="grid grid-cols-2 gap-4 pt-6 sm:grid-cols-3">
               <Detail
-                key={field.key}
-                label={field.label}
-                value={formatNumber(product[field.key])}
+                label="Product Category"
+                value={product.category ?? "—"}
               />
-            ))}
-          </CardContent>
-        </Card>
-      )}
+              <Detail
+                label="Size/Dimension"
+                value={product.size_specification ?? "—"}
+              />
+              <Detail label="Colour" value={product.colour ?? "—"} />
+              <Detail
+                label="Model number"
+                value={product.model_number ?? "—"}
+              />
+              <Detail label="Unit" value={product.unit} />
+              <Detail
+                label="Reorder level"
+                value={formatNumber(product.reorder_level)}
+              />
+              <Detail
+                label="Cost price"
+                value={formatCurrency(product.cost_price)}
+              />
+              <Detail
+                label="Selling price"
+                value={formatCurrency(product.selling_price)}
+              />
+            </CardContent>
+          </Card>
 
-      {product.notes && (
-        <Card>
-          <CardContent className="pt-6">
-            <p className="text-sm text-muted-foreground">{product.notes}</p>
-          </CardContent>
-        </Card>
-      )}
-
-      <div className="space-y-2">
-        <h2 className="font-heading text-lg font-semibold tracking-tight">
-          Transaction history
-        </h2>
-        {ledger.length === 0 ? (
-          <div className="rounded-md border border-dashed p-10 text-center text-sm text-muted-foreground">
-            No transactions yet.
-          </div>
-        ) : (
-          <div className="rounded-md border">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Date</TableHead>
-                  <TableHead>Type</TableHead>
-                  <TableHead>Reference</TableHead>
-                  <TableHead className="text-right">Quantity</TableHead>
-                  <TableHead className="text-right">Balance</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {ledger.map((entry) => (
-                  <TableRow key={entry.id}>
-                    <TableCell>{entry.transaction_date}</TableCell>
-                    <TableCell>
-                      {TRANSACTION_TYPE_LABELS[entry.transaction_type]}
-                    </TableCell>
-                    <TableCell className="text-muted-foreground">
-                      {entry.reference_number ?? entry.reason ?? "—"}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      {entry.quantity > 0 ? "+" : ""}
-                      {formatQuantity(entry.quantity)}
-                    </TableCell>
-                    <TableCell className="text-right font-medium">
-                      {formatQuantity(entry.running_balance)}
-                    </TableCell>
-                  </TableRow>
+          {conversions.length > 0 && (
+            <Card>
+              <CardContent className="grid grid-cols-2 gap-4 pt-6 sm:grid-cols-4">
+                {conversions.map((field) => (
+                  <Detail
+                    key={field.key}
+                    label={field.label}
+                    value={formatNumber(product[field.key])}
+                  />
                 ))}
-              </TableBody>
-            </Table>
-          </div>
-        )}
+              </CardContent>
+            </Card>
+          )}
+
+          {product.notes && (
+            <Card>
+              <CardContent className="pt-6">
+                <p className="text-sm text-muted-foreground">
+                  {product.notes}
+                </p>
+              </CardContent>
+            </Card>
+          )}
+        </div>
+
+        <div className="space-y-2">
+          <h2 className="font-heading text-lg font-semibold tracking-tight">
+            Transaction history
+          </h2>
+          {ledger.length === 0 ? (
+            <div className="rounded-md border border-dashed p-10 text-center text-sm text-muted-foreground">
+              No transactions yet.
+            </div>
+          ) : (
+            <div className="max-h-[600px] overflow-y-auto rounded-md border">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Date</TableHead>
+                    <TableHead>Type</TableHead>
+                    <TableHead>Reference</TableHead>
+                    <TableHead className="text-right">Quantity</TableHead>
+                    <TableHead className="text-right">Balance</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {ledger.map((entry) => (
+                    <TableRow key={entry.id}>
+                      <TableCell>{entry.transaction_date}</TableCell>
+                      <TableCell>
+                        {TRANSACTION_TYPE_LABELS[entry.transaction_type]}
+                      </TableCell>
+                      <TableCell className="text-muted-foreground">
+                        {entry.reference_number ?? entry.reason ?? "—"}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        {entry.quantity > 0 ? "+" : ""}
+                        {formatQuantity(entry.quantity)}
+                      </TableCell>
+                      <TableCell className="text-right font-medium">
+                        {formatQuantity(entry.running_balance)}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          )}
+        </div>
       </div>
+
+      <Button
+        variant="outline"
+        size="sm"
+        nativeButton={false}
+        render={<Link href="/inventory" />}
+      >
+        <ArrowLeft className="h-4 w-4" />
+        Back to Inventory
+      </Button>
     </div>
   );
 }
