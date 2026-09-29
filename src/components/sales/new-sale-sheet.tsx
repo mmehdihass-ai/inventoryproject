@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { useForm, useFieldArray, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Plus, Trash2 } from "lucide-react";
@@ -37,6 +37,10 @@ function defaultValues(): SaleFormValues {
   return {
     sale_date: today(),
     customer_name: "",
+    customer_contact_person: "",
+    customer_phone: "",
+    customer_email: "",
+    customer_address: "",
     invoice_number: "",
     delivery_note_number: "",
     notes: "",
@@ -80,6 +84,21 @@ export function NewSaleSheet({
       customer.customer_name.trim().toLowerCase() ===
       customerName.trim().toLowerCase(),
   );
+
+  useEffect(() => {
+    if (matchedCustomer) {
+      setValue("customer_contact_person", matchedCustomer.contact_person ?? "");
+      setValue("customer_phone", matchedCustomer.phone ?? "");
+      setValue("customer_email", matchedCustomer.email ?? "");
+      setValue("customer_address", matchedCustomer.address ?? "");
+    } else {
+      setValue("customer_contact_person", "");
+      setValue("customer_phone", "");
+      setValue("customer_email", "");
+      setValue("customer_address", "");
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [matchedCustomer?.id]);
 
   const productItems = products.map((product) => ({
     value: product.id,
@@ -144,6 +163,47 @@ export function NewSaleSheet({
               )}
             </Field>
           </div>
+
+          {customerName.trim() && matchedCustomer && (
+            <div className="grid grid-cols-2 gap-3 rounded-md border bg-muted/30 p-3 text-sm">
+              <div>
+                <p className="text-xs text-muted-foreground">Contact person</p>
+                <p>{matchedCustomer.contact_person || "—"}</p>
+              </div>
+              <div>
+                <p className="text-xs text-muted-foreground">Phone</p>
+                <p>{matchedCustomer.phone || "—"}</p>
+              </div>
+              <div>
+                <p className="text-xs text-muted-foreground">Email</p>
+                <p>{matchedCustomer.email || "—"}</p>
+              </div>
+              <div>
+                <p className="text-xs text-muted-foreground">Address</p>
+                <p>{matchedCustomer.address || "—"}</p>
+              </div>
+            </div>
+          )}
+
+          {customerName.trim() && !matchedCustomer && (
+            <div className="grid grid-cols-2 gap-3">
+              <Field label="Contact person">
+                <Input {...register("customer_contact_person")} />
+              </Field>
+              <Field label="Phone number">
+                <Input
+                  type="tel"
+                  {...register("customer_phone")}
+                />
+              </Field>
+              <Field label="Email">
+                <Input type="email" {...register("customer_email")} />
+              </Field>
+              <Field label="Address">
+                <Input {...register("customer_address")} />
+              </Field>
+            </div>
+          )}
 
           <div className="grid grid-cols-2 gap-3">
             <Field

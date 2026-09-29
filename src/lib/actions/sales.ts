@@ -39,6 +39,10 @@ export async function createSale(
     p_delivery_note_number: toNullable(parsed.delivery_note_number),
     p_notes: toNullable(parsed.notes),
     p_lines: lines,
+    p_customer_contact_person: toNullable(parsed.customer_contact_person),
+    p_customer_phone: toNullable(parsed.customer_phone),
+    p_customer_email: toNullable(parsed.customer_email),
+    p_customer_address: toNullable(parsed.customer_address),
   });
 
   if (error) {
