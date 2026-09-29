@@ -47,6 +47,14 @@ export default async function InventoryPage(props: PageProps<"/inventory">) {
       <div className="flex items-center justify-between">
         <h1 className="font-heading text-2xl font-semibold tracking-tight">Inventory</h1>
         <div className="flex gap-2">
+          <Button
+            size="sm"
+            nativeButton={false}
+            render={<Link href="/inventory/new" />}
+          >
+            <Plus className="h-4 w-4" />
+            New product
+          </Button>
           <StockInDialog
             products={allActiveProducts}
             triggerClassName={buttonVariants({ size: "sm" })}
@@ -67,14 +75,6 @@ export default async function InventoryPage(props: PageProps<"/inventory">) {
               </>
             }
           />
-          <Button
-            size="sm"
-            nativeButton={false}
-            render={<Link href="/inventory/new" />}
-          >
-            <Plus className="h-4 w-4" />
-            New product
-          </Button>
         </div>
       </div>
 
