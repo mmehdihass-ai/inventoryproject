@@ -79,7 +79,7 @@ export function ProductForm({ product }: { product?: Product | null }) {
       />
 
       <div className="grid grid-cols-2 gap-4">
-        <Field label="SKU / Item No." error={errors.sku?.message}>
+        <Field label="Item Number" error={errors.sku?.message}>
           <Input {...register("sku")} />
         </Field>
         <Field label="Model number" error={errors.model_number?.message}>
@@ -92,11 +92,11 @@ export function ProductForm({ product }: { product?: Product | null }) {
       </Field>
 
       <div className="grid grid-cols-3 gap-4">
-        <Field label="Category" error={errors.category?.message}>
+        <Field label="Product Category" error={errors.category?.message}>
           <Input {...register("category")} />
         </Field>
         <Field
-          label="Size / specification"
+          label="Size/Dimension"
           error={errors.size_specification?.message}
         >
           <Input {...register("size_specification")} />
@@ -110,19 +110,19 @@ export function ProductForm({ product }: { product?: Product | null }) {
         <Field label="Unit" error={errors.unit?.message}>
           <Input {...register("unit")} />
         </Field>
-        <Field label="PCS / carton" error={errors.pcs_per_carton?.message}>
+        <Field label="PCS/CTN" error={errors.pcs_per_carton?.message}>
           <Input inputMode="decimal" {...register("pcs_per_carton")} />
         </Field>
-        <Field label="KG / carton" error={errors.kg_per_carton?.message}>
+        <Field label="KG/CTN" error={errors.kg_per_carton?.message}>
           <Input inputMode="decimal" {...register("kg_per_carton")} />
         </Field>
-        <Field label="KG / pallet" error={errors.kg_per_pallet?.message}>
+        <Field label="KG/Pallet" error={errors.kg_per_pallet?.message}>
           <Input inputMode="decimal" {...register("kg_per_pallet")} />
         </Field>
       </div>
 
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-        <Field label="SQM / carton" error={errors.sqm_per_carton?.message}>
+        <Field label="SQM/CTN" error={errors.sqm_per_carton?.message}>
           <Input inputMode="decimal" {...register("sqm_per_carton")} />
         </Field>
         <Field label="Cost price (AED)" error={errors.cost_price?.message}>

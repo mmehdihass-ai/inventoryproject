@@ -24,10 +24,10 @@ const CONVERSION_FIELDS: Array<{
   key: "pcs_per_carton" | "kg_per_carton" | "kg_per_pallet" | "sqm_per_carton";
   label: string;
 }> = [
-  { key: "pcs_per_carton", label: "PCS / carton" },
-  { key: "kg_per_carton", label: "KG / carton" },
-  { key: "kg_per_pallet", label: "KG / pallet" },
-  { key: "sqm_per_carton", label: "SQM / carton" },
+  { key: "pcs_per_carton", label: "PCS/CTN" },
+  { key: "kg_per_carton", label: "KG/CTN" },
+  { key: "kg_per_pallet", label: "KG/Pallet" },
+  { key: "sqm_per_carton", label: "SQM/CTN" },
 ];
 
 const STOCK_STATUS_VARIANT = {
@@ -118,9 +118,9 @@ export default async function ProductDetailPage(
 
       <Card>
         <CardContent className="grid grid-cols-2 gap-4 pt-6 sm:grid-cols-3">
-          <Detail label="Category" value={product.category ?? "—"} />
+          <Detail label="Product Category" value={product.category ?? "—"} />
           <Detail
-            label="Size / specification"
+            label="Size/Dimension"
             value={product.size_specification ?? "—"}
           />
           <Detail label="Colour" value={product.colour ?? "—"} />
