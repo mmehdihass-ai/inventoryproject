@@ -11,17 +11,8 @@ import {
   History,
   FileBarChart,
   Boxes,
-  PackagePlus,
-  SlidersHorizontal,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { StockInDialog } from "@/components/transactions/stock-in-dialog";
-import { AdjustmentDialog } from "@/components/transactions/adjustment-dialog";
-import { NewSaleSheet } from "@/components/sales/new-sale-sheet";
-import { ReturnDialog } from "@/components/returns/return-dialog";
-import type { ProductWithStock } from "@/lib/queries/products";
-import type { Customer } from "@/lib/types/customer";
-import type { SalePickerRow } from "@/lib/queries/sales";
 
 const NAV_ITEMS = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -33,23 +24,8 @@ const NAV_ITEMS = [
   { href: "/reports", label: "Reports", icon: FileBarChart },
 ];
 
-const actionItemClass =
-  "flex w-full items-center gap-2.5 rounded-lg py-1.5 pr-3 pl-9 text-left text-sm text-sidebar-foreground/55 transition-colors hover:bg-sidebar-accent/60 hover:text-sidebar-accent-foreground";
-
-export function Sidebar({
-  products,
-  customers,
-  sales,
-}: {
-  products: ProductWithStock[];
-  customers: Customer[];
-  sales: SalePickerRow[];
-}) {
+export function Sidebar() {
   const pathname = usePathname();
-
-  function isActive(href: string) {
-    return pathname === href || pathname.startsWith(href + "/");
-  }
 
   return (
     <aside className="hidden w-60 shrink-0 flex-col bg-sidebar text-sidebar-foreground md:flex">
@@ -62,88 +38,32 @@ export function Sidebar({
         </span>
       </div>
       <nav className="flex-1 space-y-0.5 px-3 py-2">
-        <NavLink item={NAV_ITEMS[0]} active={isActive(NAV_ITEMS[0].href)} />
-
-        <NavLink item={NAV_ITEMS[1]} active={isActive(NAV_ITEMS[1].href)} />
-        <StockInDialog
-          products={products}
-          triggerClassName={actionItemClass}
-          trigger={
-            <>
-              <PackagePlus className="h-4 w-4" />
-              Stock In
-            </>
-          }
-        />
-        <AdjustmentDialog
-          products={products}
-          triggerClassName={actionItemClass}
-          trigger={
-            <>
-              <SlidersHorizontal className="h-4 w-4" />
-              Adjustment
-            </>
-          }
-        />
-
-        <NavLink item={NAV_ITEMS[2]} active={isActive(NAV_ITEMS[2].href)} />
-        <NewSaleSheet
-          products={products}
-          customers={customers}
-          triggerClassName={actionItemClass}
-          trigger={
-            <>
-              <ShoppingCart className="h-4 w-4" />
-              New Sale
-            </>
-          }
-        />
-
-        <NavLink item={NAV_ITEMS[3]} active={isActive(NAV_ITEMS[3].href)} />
-        <ReturnDialog
-          customers={customers}
-          sales={sales}
-          products={products}
-          triggerClassName={actionItemClass}
-          trigger={
-            <>
-              <Undo2 className="h-4 w-4" />
-              Return
-            </>
-          }
-        />
-
-        {NAV_ITEMS.slice(4).map((item) => (
-          <NavLink key={item.href} item={item} active={isActive(item.href)} />
-        ))}
+        {NAV_ITEMS.map((item) => {
+          const active =
+            pathname === item.href || pathname.startsWith(item.href + "/");
+          const Icon = item.icon;
+          return (
+            <Link
+              key={item.href}
+              href={item.href}
+              className={cn(
+                "flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+                active
+                  ? "bg-sidebar-accent text-sidebar-accent-foreground"
+                  : "text-sidebar-foreground/65 hover:bg-sidebar-accent/60 hover:text-sidebar-accent-foreground",
+              )}
+            >
+              <Icon
+                className={cn("h-4 w-4", active && "text-sidebar-primary")}
+              />
+              {item.label}
+            </Link>
+          );
+        })}
       </nav>
       <div className="border-t border-sidebar-border px-5 py-3 text-xs text-sidebar-foreground/40">
         Transaction-based inventory
       </div>
     </aside>
-  );
-}
-
-function NavLink({
-  item,
-  active,
-}: {
-  item: (typeof NAV_ITEMS)[number];
-  active: boolean;
-}) {
-  const Icon = item.icon;
-  return (
-    <Link
-      href={item.href}
-      className={cn(
-        "flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
-        active
-          ? "bg-sidebar-accent text-sidebar-accent-foreground"
-          : "text-sidebar-foreground/65 hover:bg-sidebar-accent/60 hover:text-sidebar-accent-foreground",
-      )}
-    >
-      <Icon className={cn("h-4 w-4", active && "text-sidebar-primary")} />
-      {item.label}
-    </Link>
   );
 }
