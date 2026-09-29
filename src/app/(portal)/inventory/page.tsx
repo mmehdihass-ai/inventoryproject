@@ -3,10 +3,17 @@ import { Plus, PackagePlus, SlidersHorizontal } from "lucide-react";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { InventoryFilters } from "@/components/products/inventory-filters";
 import { ProductTable } from "@/components/products/product-table";
+import { Pagination } from "@/components/ui/pagination";
 import { StockInDialog } from "@/components/transactions/stock-in-dialog";
 import { AdjustmentDialog } from "@/components/transactions/adjustment-dialog";
-import { listCategories, listProductsWithStock } from "@/lib/queries/products";
+import {
+  listCategories,
+  listProductsWithStock,
+  listProductsWithStockPaged,
+} from "@/lib/queries/products";
 import type { StockStatus } from "@/lib/inventory";
+
+const PAGE_SIZE = 50;
 
 const STOCK_STATUS_VALUES: StockStatus[] = [
   "IN_STOCK",
@@ -29,15 +36,24 @@ export default async function InventoryPage(props: PageProps<"/inventory">) {
   const stockStatus = STOCK_STATUS_VALUES.includes(stockParam as StockStatus)
     ? (stockParam as StockStatus)
     : undefined;
+  const page = Math.max(1, Number(searchParams.page) || 1);
 
-  const [products, categories, allActiveProducts] = await Promise.all([
-    listProductsWithStock({
-      search,
-      category,
-      active:
-        status === "active" ? true : status === "inactive" ? false : undefined,
-      stockStatus,
-    }),
+  const [
+    { rows: products, totalCount, totalPages, page: currentPage },
+    categories,
+    allActiveProducts,
+  ] = await Promise.all([
+    listProductsWithStockPaged(
+      {
+        search,
+        category,
+        active:
+          status === "active" ? true : status === "inactive" ? false : undefined,
+        stockStatus,
+      },
+      page,
+      PAGE_SIZE,
+    ),
     listCategories(),
     listProductsWithStock({ active: true }),
   ]);
@@ -80,7 +96,16 @@ export default async function InventoryPage(props: PageProps<"/inventory">) {
 
       <InventoryFilters categories={categories} />
 
-      <ProductTable products={products} />
+      <ProductTable
+        products={products}
+        startIndex={(currentPage - 1) * PAGE_SIZE}
+      />
+      <Pagination
+        page={currentPage}
+        totalPages={totalPages}
+        totalCount={totalCount}
+        pageSize={PAGE_SIZE}
+      />
     </div>
   );
 }

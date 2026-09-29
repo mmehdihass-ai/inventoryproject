@@ -1,7 +1,10 @@
 import { CustomerFilters } from "@/components/customers/customer-filters";
 import { CustomerFormDialog } from "@/components/customers/customer-form-dialog";
 import { CustomerTable } from "@/components/customers/customer-table";
-import { listCustomers } from "@/lib/queries/customers";
+import { Pagination } from "@/components/ui/pagination";
+import { listCustomersPaged } from "@/lib/queries/customers";
+
+const PAGE_SIZE = 50;
 
 export default async function CustomersPage(props: PageProps<"/customers">) {
   const searchParams = await props.searchParams;
@@ -9,12 +12,22 @@ export default async function CustomersPage(props: PageProps<"/customers">) {
     typeof searchParams.search === "string" ? searchParams.search : undefined;
   const status =
     typeof searchParams.status === "string" ? searchParams.status : undefined;
+  const page = Math.max(1, Number(searchParams.page) || 1);
 
-  const customers = await listCustomers({
-    search,
-    active:
-      status === "active" ? true : status === "inactive" ? false : undefined,
-  });
+  const {
+    rows: customers,
+    totalCount,
+    totalPages,
+    page: currentPage,
+  } = await listCustomersPaged(
+    {
+      search,
+      active:
+        status === "active" ? true : status === "inactive" ? false : undefined,
+    },
+    page,
+    PAGE_SIZE,
+  );
 
   return (
     <div className="space-y-4">
@@ -26,6 +39,12 @@ export default async function CustomersPage(props: PageProps<"/customers">) {
       <CustomerFilters />
 
       <CustomerTable customers={customers} />
+      <Pagination
+        page={currentPage}
+        totalPages={totalPages}
+        totalCount={totalCount}
+        pageSize={PAGE_SIZE}
+      />
     </div>
   );
 }

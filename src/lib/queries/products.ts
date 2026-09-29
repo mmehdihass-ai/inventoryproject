@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import type { Product } from "@/lib/types/product";
 import { computeStockConversions, type StockStatus } from "@/lib/inventory";
 import { getCurrentStockMap } from "@/lib/queries/stock";
+import { paginate, type PagedResult } from "@/lib/pagination";
 
 export type ProductListFilters = {
   search?: string;
@@ -71,6 +72,20 @@ export async function listProductsWithStock(
   }
 
   return withStock;
+}
+
+// The Inventory list page's dedicated paginated entry point. Everything
+// else (pickers, dashboard, reports) keeps calling listProductsWithStock
+// directly and gets the full matching set — stock status is a derived,
+// in-memory filter (see above), so it has to run before pagination slices
+// the result, not as a query-level LIMIT/OFFSET.
+export async function listProductsWithStockPaged(
+  filters: ProductListFilters & { stockStatus?: StockStatus } = {},
+  page = 1,
+  pageSize = 50,
+): Promise<PagedResult<ProductWithStock>> {
+  const all = await listProductsWithStock(filters);
+  return paginate(all, page, pageSize);
 }
 
 export async function getProductById(id: string): Promise<Product | null> {

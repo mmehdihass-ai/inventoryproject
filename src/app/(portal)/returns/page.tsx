@@ -2,11 +2,14 @@ import { Undo2 } from "lucide-react";
 import { buttonVariants } from "@/components/ui/button";
 import { ReturnsFilters } from "@/components/returns/returns-filters";
 import { ReturnsTable } from "@/components/returns/returns-table";
+import { Pagination } from "@/components/ui/pagination";
 import { ReturnDialog } from "@/components/returns/return-dialog";
-import { listReturns } from "@/lib/queries/returns";
+import { listReturnsPaged } from "@/lib/queries/returns";
 import { listCustomers } from "@/lib/queries/customers";
 import { listProductsWithStock } from "@/lib/queries/products";
 import { listSalesForPicker } from "@/lib/queries/sales";
+
+const PAGE_SIZE = 50;
 
 export default async function ReturnsPage(props: PageProps<"/returns">) {
   const searchParams = await props.searchParams;
@@ -16,9 +19,15 @@ export default async function ReturnsPage(props: PageProps<"/returns">) {
     typeof searchParams.customer === "string"
       ? searchParams.customer
       : undefined;
+  const page = Math.max(1, Number(searchParams.page) || 1);
 
-  const [returns, customers, products, sales] = await Promise.all([
-    listReturns({ search, customerId }),
+  const [
+    { rows: returns, totalCount, totalPages, page: currentPage },
+    customers,
+    products,
+    sales,
+  ] = await Promise.all([
+    listReturnsPaged({ search, customerId }, page, PAGE_SIZE),
     listCustomers(),
     listProductsWithStock({ active: true }),
     listSalesForPicker(),
@@ -45,6 +54,12 @@ export default async function ReturnsPage(props: PageProps<"/returns">) {
       </div>
       <ReturnsFilters customers={customers} />
       <ReturnsTable returns={returns} />
+      <Pagination
+        page={currentPage}
+        totalPages={totalPages}
+        totalCount={totalCount}
+        pageSize={PAGE_SIZE}
+      />
     </div>
   );
 }

@@ -11,7 +11,13 @@ import { formatQuantity, formatNumber } from "@/lib/utils";
 import { DeleteProductDialog } from "@/components/products/delete-product-dialog";
 import type { ProductWithStock } from "@/lib/queries/products";
 
-export function ProductTable({ products }: { products: ProductWithStock[] }) {
+export function ProductTable({
+  products,
+  startIndex = 0,
+}: {
+  products: ProductWithStock[];
+  startIndex?: number;
+}) {
   if (products.length === 0) {
     return (
       <div className="rounded-md border border-dashed p-10 text-center text-sm text-muted-foreground">
@@ -46,7 +52,7 @@ export function ProductTable({ products }: { products: ProductWithStock[] }) {
           {products.map((product, index) => (
             <TableRow key={product.id}>
               <TableCell className="text-muted-foreground">
-                {index + 1}
+                {startIndex + index + 1}
               </TableCell>
               <TableCell className="font-medium">
                 <Link

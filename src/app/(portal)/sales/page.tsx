@@ -2,10 +2,13 @@ import { ShoppingCart } from "lucide-react";
 import { buttonVariants } from "@/components/ui/button";
 import { SalesFilters } from "@/components/sales/sales-filters";
 import { SalesTable } from "@/components/sales/sales-table";
+import { Pagination } from "@/components/ui/pagination";
 import { NewSaleSheet } from "@/components/sales/new-sale-sheet";
-import { listSales } from "@/lib/queries/sales";
+import { listSalesPaged } from "@/lib/queries/sales";
 import { listCustomers } from "@/lib/queries/customers";
 import { listProductsWithStock } from "@/lib/queries/products";
+
+const PAGE_SIZE = 50;
 
 export default async function SalesPage(props: PageProps<"/sales">) {
   const searchParams = await props.searchParams;
@@ -15,9 +18,14 @@ export default async function SalesPage(props: PageProps<"/sales">) {
     typeof searchParams.customer === "string"
       ? searchParams.customer
       : undefined;
+  const page = Math.max(1, Number(searchParams.page) || 1);
 
-  const [sales, customers, products] = await Promise.all([
-    listSales({ search, customerId }),
+  const [
+    { rows: sales, totalCount, totalPages, page: currentPage },
+    customers,
+    products,
+  ] = await Promise.all([
+    listSalesPaged({ search, customerId }, page, PAGE_SIZE),
     listCustomers(),
     listProductsWithStock({ active: true }),
   ]);
@@ -42,6 +50,12 @@ export default async function SalesPage(props: PageProps<"/sales">) {
       </div>
       <SalesFilters customers={customers} />
       <SalesTable sales={sales} />
+      <Pagination
+        page={currentPage}
+        totalPages={totalPages}
+        totalCount={totalCount}
+        pageSize={PAGE_SIZE}
+      />
     </div>
   );
 }
