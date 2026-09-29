@@ -71,8 +71,20 @@ export default async function ProductDetailPage(
             </h1>
             <p className="text-muted-foreground">{product.description}</p>
           </div>
-          <Badge variant={product.active ? "secondary" : "outline"}>
-            {product.active ? "Active" : "Inactive"}
+          <Badge
+            variant={
+              product.deleted_at
+                ? "destructive"
+                : product.active
+                  ? "secondary"
+                  : "outline"
+            }
+          >
+            {product.deleted_at
+              ? "Deleted"
+              : product.active
+                ? "Active"
+                : "Inactive"}
           </Badge>
         </div>
         <Button
@@ -85,6 +97,19 @@ export default async function ProductDetailPage(
           Edit product
         </Button>
       </div>
+
+      {product.deleted_at && (
+        <Card>
+          <CardContent className="pt-6 text-sm">
+            <p className="font-medium text-destructive">
+              Deleted on {product.deleted_at.slice(0, 10)}
+            </p>
+            <p className="text-muted-foreground">
+              Reason: {product.deletion_reason}
+            </p>
+          </CardContent>
+        </Card>
+      )}
 
       <Card>
         <CardContent className="flex flex-wrap items-center gap-6 pt-6">

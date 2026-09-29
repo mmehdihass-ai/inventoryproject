@@ -8,6 +8,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { formatQuantity, formatNumber } from "@/lib/utils";
+import { DeleteProductDialog } from "@/components/products/delete-product-dialog";
 import type { ProductWithStock } from "@/lib/queries/products";
 
 export function ProductTable({ products }: { products: ProductWithStock[] }) {
@@ -38,6 +39,7 @@ export function ProductTable({ products }: { products: ProductWithStock[] }) {
             <TableHead className="text-right">SQM/CTN</TableHead>
             <TableHead className="text-right">Balance SQM</TableHead>
             <TableHead className="text-right">Balance Box</TableHead>
+            <TableHead className="w-10" />
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -90,6 +92,12 @@ export function ProductTable({ products }: { products: ProductWithStock[] }) {
               </TableCell>
               <TableCell className="text-right text-muted-foreground">
                 {formatQuantity(product.stockCarton)}
+              </TableCell>
+              <TableCell>
+                <DeleteProductDialog
+                  productId={product.id}
+                  productLabel={product.sku}
+                />
               </TableCell>
             </TableRow>
           ))}

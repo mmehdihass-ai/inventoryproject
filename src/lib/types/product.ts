@@ -17,6 +17,8 @@ export type Product = {
   photo_url: string | null;
   notes: string | null;
   active: boolean;
+  deleted_at: string | null;
+  deletion_reason: string | null;
   created_at: string;
   updated_at: string;
 };

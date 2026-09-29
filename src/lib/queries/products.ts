@@ -21,7 +21,11 @@ export async function listProducts(
   filters: ProductListFilters = {},
 ): Promise<Product[]> {
   const supabase = await createClient();
-  let query = supabase.from("products").select("*").order("description");
+  let query = supabase
+    .from("products")
+    .select("*")
+    .is("deleted_at", null)
+    .order("description");
 
   const search = filters.search?.trim().replace(/,/g, "");
   if (search) {
@@ -86,6 +90,7 @@ export async function listCategories(): Promise<string[]> {
   const { data, error } = await supabase
     .from("products")
     .select("category")
+    .is("deleted_at", null)
     .not("category", "is", null);
 
   if (error) throw error;
