@@ -49,7 +49,7 @@ export default async function InventoryPage(props: PageProps<"/inventory">) {
         <div className="flex gap-2">
           <StockInDialog
             products={allActiveProducts}
-            triggerClassName={buttonVariants({ variant: "outline", size: "sm" })}
+            triggerClassName={buttonVariants({ size: "sm" })}
             trigger={
               <>
                 <PackagePlus className="h-4 w-4" />
@@ -59,7 +59,7 @@ export default async function InventoryPage(props: PageProps<"/inventory">) {
           />
           <AdjustmentDialog
             products={allActiveProducts}
-            triggerClassName={buttonVariants({ variant: "outline", size: "sm" })}
+            triggerClassName={buttonVariants({ size: "sm" })}
             trigger={
               <>
                 <SlidersHorizontal className="h-4 w-4" />

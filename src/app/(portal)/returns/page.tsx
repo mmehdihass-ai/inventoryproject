@@ -34,7 +34,7 @@ export default async function ReturnsPage(props: PageProps<"/returns">) {
           customers={customers}
           sales={sales}
           products={products}
-          triggerClassName={buttonVariants({ variant: "outline", size: "sm" })}
+          triggerClassName={buttonVariants({ size: "sm" })}
           trigger={
             <>
               <Undo2 className="h-4 w-4" />

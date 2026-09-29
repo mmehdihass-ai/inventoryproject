@@ -31,7 +31,7 @@ export default async function SalesPage(props: PageProps<"/sales">) {
         <NewSaleSheet
           products={products}
           customers={customers}
-          triggerClassName={buttonVariants({ variant: "outline", size: "sm" })}
+          triggerClassName={buttonVariants({ size: "sm" })}
           trigger={
             <>
               <ShoppingCart className="h-4 w-4" />
