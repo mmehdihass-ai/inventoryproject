@@ -14,6 +14,8 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { UserMenu } from "@/components/layout/user-menu";
+import { EnvSwitcher } from "@/components/layout/env-switcher";
+import type { SupabaseEnv } from "@/lib/env-config";
 
 const COMPANY_NAME = "AL Tareeq AL Sahal Building Materials Trading FZE";
 
@@ -27,7 +29,13 @@ const NAV_ITEMS = [
   { href: "/reports", label: "Reports", icon: FileBarChart },
 ];
 
-export function TopHeader({ email }: { email: string }) {
+export function TopHeader({
+  email,
+  env,
+}: {
+  email: string;
+  env: SupabaseEnv;
+}) {
   const pathname = usePathname();
 
   return (
@@ -44,7 +52,10 @@ export function TopHeader({ email }: { email: string }) {
             {COMPANY_NAME}
           </h1>
         </div>
-        <UserMenu email={email} variant="dark" />
+        <div className="flex shrink-0 items-center gap-2">
+          <EnvSwitcher env={env} />
+          <UserMenu email={email} variant="dark" />
+        </div>
       </div>
       <nav className="flex items-center gap-1 border-t border-sidebar-border px-4 py-1.5">
         {NAV_ITEMS.map((item) => {

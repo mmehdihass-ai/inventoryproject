@@ -1,5 +1,6 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
+import { ENV_COOKIE_NAME, parseEnv, getSupabaseCredentials } from "@/lib/env-config";
 
 const PUBLIC_ROUTES = ["/login", "/forgot-password", "/reset-password"];
 // Reachable regardless of auth state — a password-recovery link may load
@@ -9,9 +10,12 @@ const NEUTRAL_ROUTES = ["/reset-password"];
 export async function updateSession(request: NextRequest) {
   let response = NextResponse.next({ request });
 
+  const env = parseEnv(request.cookies.get(ENV_COOKIE_NAME)?.value);
+  const { url: supabaseUrl, anonKey } = getSupabaseCredentials(env);
+
   const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    supabaseUrl,
+    anonKey,
     {
       cookies: {
         getAll() {

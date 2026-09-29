@@ -1,7 +1,13 @@
+import { cookies } from "next/headers";
 import { Boxes } from "lucide-react";
 import { LoginForm } from "./login-form";
+import { EnvSwitcher } from "@/components/layout/env-switcher";
+import { ENV_COOKIE_NAME, parseEnv } from "@/lib/env-config";
 
-export default function LoginPage() {
+export default async function LoginPage() {
+  const cookieStore = await cookies();
+  const env = parseEnv(cookieStore.get(ENV_COOKIE_NAME)?.value);
+
   return (
     <div className="grid min-h-screen md:grid-cols-2">
       <div className="relative hidden flex-col justify-between overflow-hidden bg-sidebar p-10 text-sidebar-foreground md:flex">
@@ -34,13 +40,16 @@ export default function LoginPage() {
 
       <div className="flex items-center justify-center bg-background px-6 py-12">
         <div className="w-full max-w-sm space-y-6">
-          <div className="space-y-1">
-            <h1 className="font-heading text-2xl font-semibold tracking-tight">
-              Welcome back
-            </h1>
-            <p className="text-sm text-muted-foreground">
-              Sign in to manage inventory
-            </p>
+          <div className="flex items-start justify-between gap-4">
+            <div className="space-y-1">
+              <h1 className="font-heading text-2xl font-semibold tracking-tight">
+                Welcome back
+              </h1>
+              <p className="text-sm text-muted-foreground">
+                Sign in to manage inventory
+              </p>
+            </div>
+            <EnvSwitcher env={env} />
           </div>
           <LoginForm />
         </div>
