@@ -1,11 +1,4 @@
-import {
-  Boxes,
-  Wallet,
-  ShoppingCart,
-  TrendingUp,
-  AlertTriangle,
-  XCircle,
-} from "lucide-react";
+import { Boxes, PackageCheck, CalendarCheck, ShoppingCart, TrendingUp } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { KpiCard } from "@/components/dashboard/kpi-card";
 import { SalesTrendChart } from "@/components/dashboard/sales-trend-chart";
@@ -45,7 +38,7 @@ export default async function DashboardPage() {
         Dashboard
       </h1>
 
-      <div className="grid grid-cols-2 gap-4 lg:grid-cols-3 xl:grid-cols-6">
+      <div className="grid grid-cols-2 gap-4 lg:grid-cols-3 xl:grid-cols-5">
         <KpiCard
           label="Total stock"
           value={`${formatQuantity(kpis.totalStockPcs)} PCS`}
@@ -53,10 +46,16 @@ export default async function DashboardPage() {
           icon={Boxes}
         />
         <KpiCard
-          label="Inventory value"
-          value={formatCurrency(kpis.inventoryValue)}
-          href="/inventory"
-          icon={Wallet}
+          label="Items sold today"
+          value={formatQuantity(kpis.itemsSoldToday)}
+          href="/sales"
+          icon={PackageCheck}
+        />
+        <KpiCard
+          label="Items sold this month"
+          value={formatQuantity(kpis.itemsSoldThisMonth)}
+          href="/sales"
+          icon={CalendarCheck}
         />
         <KpiCard
           label="Sales today"
@@ -69,20 +68,6 @@ export default async function DashboardPage() {
           value={formatCurrency(kpis.salesThisMonth)}
           href="/sales"
           icon={TrendingUp}
-        />
-        <KpiCard
-          label="Low stock items"
-          value={String(kpis.lowStockCount)}
-          href="/inventory?stock=LOW_STOCK"
-          icon={AlertTriangle}
-          tone={kpis.lowStockCount > 0 ? "critical" : "default"}
-        />
-        <KpiCard
-          label="Out of stock items"
-          value={String(kpis.outOfStockCount)}
-          href="/inventory?stock=OUT_OF_STOCK"
-          icon={XCircle}
-          tone={kpis.outOfStockCount > 0 ? "critical" : "default"}
         />
       </div>
 

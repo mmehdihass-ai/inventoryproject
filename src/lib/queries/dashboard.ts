@@ -20,11 +20,10 @@ function daysAgo(days: number): string {
 
 export type DashboardKpis = {
   totalStockPcs: number;
-  inventoryValue: number;
+  itemsSoldToday: number;
+  itemsSoldThisMonth: number;
   salesToday: number;
   salesThisMonth: number;
-  lowStockCount: number;
-  outOfStockCount: number;
 };
 
 export async function getDashboardKpis(): Promise<DashboardKpis> {
@@ -32,26 +31,25 @@ export async function getDashboardKpis(): Promise<DashboardKpis> {
   const today = isoDate(new Date());
   const monthStart = startOfMonth();
 
-  const [products, todaySales, monthSales] = await Promise.all([
-    listProductsWithStock({ active: true }),
-    supabase.from("sales").select("total_amount").eq("sale_date", today),
-    supabase
-      .from("sales")
-      .select("total_amount")
-      .gte("sale_date", monthStart),
-  ]);
+  const [products, todaySales, monthSales, todayItems, monthItems] =
+    await Promise.all([
+      listProductsWithStock({ active: true }),
+      supabase.from("sales").select("total_amount").eq("sale_date", today),
+      supabase
+        .from("sales")
+        .select("total_amount")
+        .gte("sale_date", monthStart),
+      supabase
+        .from("sale_items")
+        .select("quantity, sales!inner(sale_date)")
+        .eq("sales.sale_date", today),
+      supabase
+        .from("sale_items")
+        .select("quantity, sales!inner(sale_date)")
+        .gte("sales.sale_date", monthStart),
+    ]);
 
   const totalStockPcs = products.reduce((sum, p) => sum + p.stockPcs, 0);
-  const inventoryValue = products.reduce(
-    (sum, p) => sum + p.stockPcs * (p.cost_price ?? 0),
-    0,
-  );
-  const lowStockCount = products.filter(
-    (p) => p.stockStatus === "LOW_STOCK",
-  ).length;
-  const outOfStockCount = products.filter(
-    (p) => p.stockStatus === "OUT_OF_STOCK",
-  ).length;
 
   const salesToday = (todaySales.data ?? []).reduce(
     (sum, s) => sum + s.total_amount,
@@ -62,13 +60,21 @@ export async function getDashboardKpis(): Promise<DashboardKpis> {
     0,
   );
 
+  const itemsSoldToday = (todayItems.data ?? []).reduce(
+    (sum, item) => sum + item.quantity,
+    0,
+  );
+  const itemsSoldThisMonth = (monthItems.data ?? []).reduce(
+    (sum, item) => sum + item.quantity,
+    0,
+  );
+
   return {
     totalStockPcs,
-    inventoryValue,
+    itemsSoldToday,
+    itemsSoldThisMonth,
     salesToday,
     salesThisMonth,
-    lowStockCount,
-    outOfStockCount,
   };
 }
 
