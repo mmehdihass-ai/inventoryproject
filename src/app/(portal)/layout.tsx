@@ -1,7 +1,6 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { Sidebar } from "@/components/layout/sidebar";
-import { TopBar } from "@/components/layout/top-bar";
+import { TopHeader } from "@/components/layout/top-header";
 
 export default async function PortalLayout({
   children,
@@ -18,12 +17,9 @@ export default async function PortalLayout({
   }
 
   return (
-    <div className="flex h-screen w-full overflow-hidden">
-      <Sidebar />
-      <div className="flex flex-1 flex-col overflow-hidden">
-        <TopBar email={user.email ?? ""} />
-        <main className="flex-1 overflow-y-auto p-8">{children}</main>
-      </div>
+    <div className="flex h-screen w-full flex-col overflow-hidden">
+      <TopHeader email={user.email ?? ""} />
+      <main className="flex-1 overflow-y-auto p-8">{children}</main>
     </div>
   );
 }

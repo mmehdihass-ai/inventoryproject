@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { LogOut, User } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { buttonVariants } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -14,7 +15,16 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-export function UserMenu({ email }: { email: string }) {
+const darkTriggerClass =
+  "inline-flex h-8 items-center gap-2 rounded-lg px-2.5 text-sm font-medium text-sidebar-foreground/80 transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground";
+
+export function UserMenu({
+  email,
+  variant = "light",
+}: {
+  email: string;
+  variant?: "light" | "dark";
+}) {
   const router = useRouter();
 
   async function handleLogout() {
@@ -27,7 +37,11 @@ export function UserMenu({ email }: { email: string }) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger
-        className={buttonVariants({ variant: "ghost", size: "sm", className: "gap-2" })}
+        className={cn(
+          variant === "dark"
+            ? darkTriggerClass
+            : buttonVariants({ variant: "ghost", size: "sm", className: "gap-2" }),
+        )}
       >
         <User className="h-4 w-4" />
         {email}
