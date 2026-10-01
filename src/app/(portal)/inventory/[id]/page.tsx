@@ -57,48 +57,7 @@ export default async function ProductDetailPage(
   );
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-5">
-          <ProductPhoto
-            src={product.photo_url}
-            alt={product.description}
-            size={160}
-            className="rounded-xl"
-          />
-          <div>
-            <h1 className="font-heading text-2xl font-semibold tracking-tight">
-              {product.sku}
-            </h1>
-            <p className="text-muted-foreground">{product.description}</p>
-          </div>
-          <Badge
-            variant={
-              product.deleted_at
-                ? "destructive"
-                : product.active
-                  ? "secondary"
-                  : "outline"
-            }
-          >
-            {product.deleted_at
-              ? "Deleted"
-              : product.active
-                ? "Active"
-                : "Inactive"}
-          </Badge>
-        </div>
-        <Button
-          variant="outline"
-          size="sm"
-          nativeButton={false}
-          render={<Link href={`/inventory/${product.id}/edit`} />}
-        >
-          <Pencil className="h-4 w-4" />
-          Edit Product
-        </Button>
-      </div>
-
+    <div className="space-y-4">
       {product.deleted_at && (
         <Card>
           <CardContent className="pt-6 text-sm">
@@ -112,8 +71,46 @@ export default async function ProductDetailPage(
         </Card>
       )}
 
-      <div className="grid gap-6 xl:grid-cols-[1.6fr_1fr]">
-        <div className="space-y-6">
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-[300px_1fr_380px]">
+        <div>
+          <Card>
+            <CardContent className="flex items-center gap-4 pt-6">
+              <ProductPhoto
+                src={product.photo_url}
+                alt={product.description}
+                size={110}
+                className="rounded-xl"
+              />
+              <div className="min-w-0">
+                <div className="flex flex-wrap items-center gap-2">
+                  <h1 className="font-heading text-xl font-semibold tracking-tight">
+                    {product.sku}
+                  </h1>
+                  <Badge
+                    variant={
+                      product.deleted_at
+                        ? "destructive"
+                        : product.active
+                          ? "secondary"
+                          : "outline"
+                    }
+                  >
+                    {product.deleted_at
+                      ? "Deleted"
+                      : product.active
+                        ? "Active"
+                        : "Inactive"}
+                  </Badge>
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  {product.description}
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        <div className="space-y-4">
           <Card>
             <CardContent className="flex flex-wrap items-center gap-6 pt-6">
               <div>
@@ -202,9 +199,30 @@ export default async function ProductDetailPage(
               </CardContent>
             </Card>
           )}
+
+          <Button
+            variant="outline"
+            size="sm"
+            nativeButton={false}
+            render={<Link href="/inventory" />}
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Back to Inventory
+          </Button>
         </div>
 
         <div className="space-y-2">
+          <div className="flex justify-end">
+            <Button
+              variant="outline"
+              size="sm"
+              nativeButton={false}
+              render={<Link href={`/inventory/${product.id}/edit`} />}
+            >
+              <Pencil className="h-4 w-4" />
+              Edit Product
+            </Button>
+          </div>
           <h2 className="font-heading text-lg font-semibold tracking-tight">
             Transaction History
           </h2>
@@ -249,16 +267,6 @@ export default async function ProductDetailPage(
           )}
         </div>
       </div>
-
-      <Button
-        variant="outline"
-        size="sm"
-        nativeButton={false}
-        render={<Link href="/inventory" />}
-      >
-        <ArrowLeft className="h-4 w-4" />
-        Back to Inventory
-      </Button>
     </div>
   );
 }
