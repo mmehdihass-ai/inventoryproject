@@ -1240,3 +1240,6 @@ end;
 $$;
 
 grant execute on function fn_update_sale(uuid, date, text, text, numeric, text, jsonb) to authenticated;
+
+alter table products
+  add column if not exists vendor_name text;

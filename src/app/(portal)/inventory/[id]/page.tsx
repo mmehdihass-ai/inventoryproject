@@ -155,20 +155,24 @@ export default async function ProductDetailPage(
               />
               <Detail label="Colour" value={product.colour ?? "—"} />
               <Detail
-                label="Model number"
+                label="Vendor Name"
+                value={product.vendor_name ?? "—"}
+              />
+              <Detail
+                label="Model Number"
                 value={product.model_number ?? "—"}
               />
               <Detail label="Unit" value={product.unit} />
               <Detail
-                label="Reorder level"
+                label="Reorder Level"
                 value={formatNumber(product.reorder_level)}
               />
               <Detail
-                label="Cost price"
+                label="Cost Price"
                 value={formatCurrency(product.cost_price)}
               />
               <Detail
-                label="Selling price"
+                label="Selling Price"
                 value={formatCurrency(product.selling_price)}
               />
             </CardContent>

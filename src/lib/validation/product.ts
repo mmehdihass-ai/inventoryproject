@@ -14,6 +14,7 @@ function numericField(opts: { positive?: boolean } = {}) {
 
 export const productFormSchema = z.object({
   sku: z.string().min(1, "SKU is required"),
+  vendor_name: z.string(),
   model_number: z.string(),
   description: z.string().min(1, "Description is required"),
   category: z.string(),
@@ -36,6 +37,7 @@ export type ProductFormValues = z.infer<typeof productFormSchema>;
 export const productPayloadSchema = z.object({
   id: z.string().uuid(),
   sku: z.string().min(1),
+  vendor_name: z.string().nullable(),
   model_number: z.string().nullable(),
   description: z.string().min(1),
   category: z.string().nullable(),
@@ -69,6 +71,7 @@ export function buildProductPayload(
   return productPayloadSchema.parse({
     id,
     sku: values.sku.trim(),
+    vendor_name: values.vendor_name.trim() || null,
     model_number: values.model_number.trim() || null,
     description: values.description.trim(),
     category: values.category.trim() || null,

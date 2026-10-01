@@ -23,6 +23,7 @@ import type { Product } from "@/lib/types/product";
 function toFormValues(product?: Product | null): ProductFormValues {
   return {
     sku: product?.sku ?? "",
+    vendor_name: product?.vendor_name ?? "",
     model_number: product?.model_number ?? "",
     description: product?.description ?? "",
     category: product?.category ?? "",
@@ -71,14 +72,17 @@ export function ProductForm({ product }: { product?: Product | null }) {
   }
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="max-w-3xl space-y-6">
+    <form onSubmit={handleSubmit(onSubmit)} className="w-full space-y-6">
       <ProductPhotoUploader
         productId={productId}
         value={photoUrl}
         onChange={setPhotoUrl}
       />
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-3 gap-4">
+        <Field label="Vendor Name" error={errors.vendor_name?.message}>
+          <Input {...register("vendor_name")} />
+        </Field>
         <Field label="Item Number" error={errors.sku?.message}>
           <Input {...register("sku")} />
         </Field>

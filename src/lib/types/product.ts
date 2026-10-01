@@ -1,6 +1,7 @@
 export type Product = {
   id: string;
   sku: string;
+  vendor_name: string | null;
   model_number: string | null;
   description: string;
   category: string | null;
