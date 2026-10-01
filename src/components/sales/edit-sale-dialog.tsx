@@ -147,6 +147,12 @@ export function EditSaleDialog({
     return unitPrice * (1 - discountPercent / 100);
   }
 
+  function discountPercentFor(unitPrice: number, sellPrice: number) {
+    if (unitPrice <= 0) return 0;
+    const percent = (1 - sellPrice / unitPrice) * 100;
+    return Math.round(Math.min(100, Math.max(0, percent)) * 100) / 100;
+  }
+
   const subtotal = lines.reduce((sum, line) => {
     const qty = Number(line.quantity) || 0;
     const price = Number(line.unit_price) || 0;
@@ -348,9 +354,17 @@ export function EditSaleDialog({
                     </Field>
                     <Field label="Sell Price">
                       <Input
-                        readOnly
-                        disabled
-                        value={formatCurrency(sellPrice)}
+                        inputMode="decimal"
+                        value={String(Math.round(sellPrice * 100) / 100)}
+                        onChange={(e) => {
+                          const typed = Number(e.target.value);
+                          if (!Number.isNaN(typed)) {
+                            setValue(
+                              `lines.${index}.discount`,
+                              String(discountPercentFor(unitPrice, typed)),
+                            );
+                          }
+                        }}
                       />
                     </Field>
                   </div>
