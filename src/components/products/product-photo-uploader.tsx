@@ -20,10 +20,12 @@ export function ProductPhotoUploader({
   productId,
   value,
   onChange,
+  size = 220,
 }: {
   productId: string;
   value: string | null;
   onChange: (url: string | null) => void;
+  size?: number;
 }) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
@@ -63,19 +65,24 @@ export function ProductPhotoUploader({
   }
 
   return (
-    <div className="flex items-center gap-4">
-      <ProductPhoto src={value} alt="" size={80} />
-      <div className="flex flex-col gap-2">
-        <input
-          ref={inputRef}
-          type="file"
-          accept="image/*"
-          className="hidden"
-          onChange={(e) => {
-            const file = e.target.files?.[0];
-            if (file) handleFile(file);
-          }}
-        />
+    <div className="flex flex-col items-center gap-3">
+      <ProductPhoto
+        src={value}
+        alt=""
+        size={size}
+        className="rounded-xl"
+      />
+      <input
+        ref={inputRef}
+        type="file"
+        accept="image/*"
+        className="hidden"
+        onChange={(e) => {
+          const file = e.target.files?.[0];
+          if (file) handleFile(file);
+        }}
+      />
+      <div className="flex w-full flex-col gap-2">
         <Button
           type="button"
           variant="outline"
@@ -88,7 +95,7 @@ export function ProductPhotoUploader({
           ) : (
             <Upload className="h-4 w-4" />
           )}
-          {value ? "Replace photo" : "Upload photo"}
+          {value ? "Replace Photo" : "Upload Photo"}
         </Button>
         {value && (
           <Button
