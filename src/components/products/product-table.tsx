@@ -32,6 +32,7 @@ export function ProductTable({
         <TableHeader>
           <TableRow>
             <TableHead>No.</TableHead>
+            <TableHead>Vendor</TableHead>
             <TableHead>Item Number</TableHead>
             <TableHead>Description</TableHead>
             <TableHead>Size/Dimension</TableHead>
@@ -53,6 +54,9 @@ export function ProductTable({
             <TableRow key={product.id}>
               <TableCell className="text-muted-foreground">
                 {startIndex + index + 1}
+              </TableCell>
+              <TableCell className="text-muted-foreground">
+                {product.vendor_name ?? "—"}
               </TableCell>
               <TableCell className="font-medium">
                 <Link
