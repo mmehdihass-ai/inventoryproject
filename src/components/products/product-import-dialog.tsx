@@ -176,9 +176,12 @@ export function ProductImportDialog() {
         <div className="space-y-4">
           <p className="text-sm text-muted-foreground">
             Creates a new product for each new Item Number, or updates the
-            matching existing product otherwise. Opening Stock only applies
-            to brand-new products — to adjust an existing product&apos;s
-            stock, use Stock In or Adjustment instead.
+            matching existing product otherwise — a blank cell on an
+            existing product leaves that field as it is, it won&apos;t clear
+            it. Opening Stock only applies to brand-new products — to adjust
+            an existing product&apos;s stock, use Stock In or Adjustment
+            instead. Embedded images in the file are not imported as product
+            photos.
           </p>
 
           <div className="flex flex-wrap items-center gap-2">

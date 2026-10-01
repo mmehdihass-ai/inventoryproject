@@ -93,15 +93,19 @@ export async function importProducts(
     }
 
     if (existing) {
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const { id: _id, ...fields } = parsed.payload;
-      const { error } = await supabase
-        .from("products")
-        .update(fields)
-        .eq("id", existing.id);
-      if (error) {
-        summary.errors.push({ rowNumber, sku: parsed.sku, message: error.message });
-        continue;
+      const fields: Partial<ProductPayload> = {};
+      for (const key of parsed.providedFields) {
+        fields[key] = parsed.payload[key] as never;
+      }
+      if (Object.keys(fields).length > 0) {
+        const { error } = await supabase
+          .from("products")
+          .update(fields)
+          .eq("id", existing.id);
+        if (error) {
+          summary.errors.push({ rowNumber, sku: parsed.sku, message: error.message });
+          continue;
+        }
       }
       summary.updated += 1;
       continue;
