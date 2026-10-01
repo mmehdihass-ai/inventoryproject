@@ -41,6 +41,7 @@ export const editSaleFormSchema = z.object({
   delivery_note_number: z.string(),
   tax_percent: nonNegativeNumericString,
   notes: z.string(),
+  lines: z.array(saleLineSchema).min(1, "Add at least one product"),
 });
 
 export type EditSaleFormValues = z.infer<typeof editSaleFormSchema>;

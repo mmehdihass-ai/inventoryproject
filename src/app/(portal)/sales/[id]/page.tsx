@@ -16,6 +16,7 @@ import { InvoiceStatusBadge } from "@/components/sales/invoice-status-badge";
 import { RecordPaymentDialog } from "@/components/sales/record-payment-dialog";
 import { EditSaleDialog } from "@/components/sales/edit-sale-dialog";
 import { getSaleById } from "@/lib/queries/sales";
+import { listProductsWithStock } from "@/lib/queries/products";
 import { listPaymentsForSale } from "@/lib/queries/payments";
 import { formatCurrency, formatQuantity } from "@/lib/utils";
 
@@ -29,7 +30,10 @@ export default async function SaleDetailPage(
     notFound();
   }
 
-  const payments = await listPaymentsForSale(id);
+  const [payments, products] = await Promise.all([
+    listPaymentsForSale(id),
+    listProductsWithStock({ active: true }),
+  ]);
   const paidTotal = payments.reduce((sum, p) => sum + p.amount, 0);
   const balanceDue = sale.grand_total - paidTotal;
 
@@ -61,7 +65,7 @@ export default async function SaleDetailPage(
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <EditSaleDialog sale={sale} />
+          <EditSaleDialog sale={sale} products={products} />
           <Button
             variant="outline"
             size="sm"

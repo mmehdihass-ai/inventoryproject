@@ -72,29 +72,40 @@ export async function createSale(
   redirect(`/sales/${data.id}`);
 }
 
-export async function updateSaleDetails(
+export async function updateSale(
   saleId: string,
   values: EditSaleFormValues,
 ): Promise<ActionResult> {
   const parsed = editSaleFormSchema.parse(values);
   const supabase = await createClient();
 
-  const { error } = await supabase.rpc("fn_update_sale_details", {
+  const lines = parsed.lines.map((line) => ({
+    product_id: line.product_id,
+    quantity: Number(line.quantity),
+    unit_price: Number(line.unit_price),
+    discount: line.discount.trim() === "" ? 0 : Number(line.discount),
+  }));
+
+  const { error } = await supabase.rpc("fn_update_sale", {
     p_sale_id: saleId,
     p_sale_date: parsed.sale_date,
     p_invoice_number: parsed.invoice_number.trim(),
     p_delivery_note_number: toNullable(parsed.delivery_note_number),
     p_tax_percent: parsed.tax_percent.trim() === "" ? 0 : Number(parsed.tax_percent),
     p_notes: toNullable(parsed.notes),
+    p_lines: lines,
   });
 
   if (error) {
     return { error: friendlyError(error, parsed.invoice_number) };
   }
 
+  revalidatePath("/inventory");
   revalidatePath("/sales");
   revalidatePath(`/sales/${saleId}`);
   revalidatePath(`/invoices/${saleId}`);
+  revalidatePath("/dashboard");
+  revalidatePath("/transactions");
 }
 
 export async function recordPayment(
