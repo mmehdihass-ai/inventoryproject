@@ -1,7 +1,6 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import {
   editSaleFormSchema,
@@ -13,6 +12,7 @@ import {
 } from "@/lib/validation/sale";
 
 type ActionResult = { error: string } | undefined;
+type CreateSaleResult = { error: string } | { id: string };
 
 function toNullable(value: string): string | null {
   const trimmed = value.trim();
@@ -28,7 +28,7 @@ function friendlyError(error: { code?: string; message: string }, invoice: strin
 
 export async function createSale(
   values: SaleFormValues,
-): Promise<ActionResult> {
+): Promise<CreateSaleResult> {
   const parsed = saleFormSchema.parse(values);
   const supabase = await createClient();
 
@@ -69,7 +69,7 @@ export async function createSale(
   revalidatePath("/dashboard");
   revalidatePath("/transactions");
   revalidatePath("/customers");
-  redirect(`/sales/${data.id}`);
+  return { id: data.id };
 }
 
 export async function updateSale(

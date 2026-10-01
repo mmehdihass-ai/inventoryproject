@@ -110,7 +110,7 @@ export function StockInDialog({
       <DialogTrigger className={triggerClassName}>{trigger}</DialogTrigger>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Stock in</DialogTitle>
+          <DialogTitle>Stock In</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div className="grid grid-cols-2 gap-3">
@@ -128,9 +128,9 @@ export function StockInDialog({
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="STOCK_IN">Stock in</SelectItem>
+                      <SelectItem value="STOCK_IN">Stock In</SelectItem>
                       <SelectItem value="OPENING_STOCK">
-                        Opening stock
+                        Opening Stock
                       </SelectItem>
                     </SelectContent>
                   </Select>
@@ -162,7 +162,7 @@ export function StockInDialog({
               <Input inputMode="decimal" {...register("quantity")} />
             </Field>
             <Field
-              label="Cost (AED, optional)"
+              label="Cost (AED, Optional)"
               error={errors.unit_cost?.message}
             >
               <Input inputMode="decimal" {...register("unit_cost")} />
@@ -170,10 +170,10 @@ export function StockInDialog({
           </div>
 
           <div className="grid grid-cols-2 gap-3">
-            <Field label="Supplier name">
+            <Field label="Supplier Name">
               <Input {...register("supplier_name")} />
             </Field>
-            <Field label="PO / reference">
+            <Field label="PO / Reference">
               <Input {...register("reference_number")} />
             </Field>
           </div>

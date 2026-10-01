@@ -1,9 +1,11 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Plus, Pencil } from "lucide-react";
+import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -44,6 +46,7 @@ export function CustomerFormDialog({
 }: {
   customer?: Customer | null;
 }) {
+  const router = useRouter();
   const isEditing = Boolean(customer);
   const [open, setOpen] = useState(false);
   const [customerId] = useState(() => customer?.id ?? crypto.randomUUID());
@@ -65,8 +68,17 @@ export function CustomerFormDialog({
     const payload = buildCustomerPayload(customerId, values);
     const action = isEditing ? updateCustomer : createCustomer;
     const result = await action(payload);
-    if (result?.error) {
+    if ("error" in result) {
       setFormError(result.error);
+      return;
+    }
+    toast.success(isEditing ? "Customer updated" : "Customer created");
+    setOpen(false);
+    reset(toFormValues(customer));
+    if (isEditing) {
+      router.refresh();
+    } else {
+      router.push(`/customers/${result.id}`);
     }
   }
 
@@ -91,21 +103,21 @@ export function CustomerFormDialog({
         ) : (
           <Plus className="h-4 w-4" />
         )}
-        {isEditing ? "Edit customer" : "New customer"}
+        {isEditing ? "Edit Customer" : "New Customer"}
       </DialogTrigger>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>
-            {isEditing ? "Edit customer" : "New customer"}
+            {isEditing ? "Edit Customer" : "New Customer"}
           </DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          <Field label="Customer name" error={errors.customer_name?.message}>
+          <Field label="Customer Name" error={errors.customer_name?.message}>
             <Input {...register("customer_name")} />
           </Field>
 
           <div className="grid grid-cols-2 gap-3">
-            <Field label="Contact person">
+            <Field label="Contact Person">
               <Input {...register("contact_person")} />
             </Field>
             <Field label="Phone">
@@ -146,7 +158,7 @@ export function CustomerFormDialog({
 
           <DialogFooter>
             <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting ? "Saving..." : isEditing ? "Save changes" : "Create customer"}
+              {isSubmitting ? "Saving..." : isEditing ? "Save Changes" : "Create Customer"}
             </Button>
           </DialogFooter>
         </form>

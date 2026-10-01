@@ -1,19 +1,21 @@
 "use client";
 
 import { useEffect, useState, type ReactNode } from "react";
+import { useRouter } from "next/navigation";
 import { useForm, useFieldArray, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { toast } from "sonner";
 import { Plus, Trash2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
-  Sheet,
-  SheetContent,
-  SheetFooter,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -63,6 +65,7 @@ export function NewSaleSheet({
   trigger: ReactNode;
   triggerClassName?: string;
 }) {
+  const router = useRouter();
   const [open, setOpen] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
 
@@ -129,13 +132,18 @@ export function NewSaleSheet({
   async function onSubmit(values: SaleFormValues) {
     setFormError(null);
     const result = await createSale(values);
-    if (result?.error) {
+    if ("error" in result) {
       setFormError(result.error);
+      return;
     }
+    toast.success("Sale saved");
+    setOpen(false);
+    reset(defaultValues());
+    router.push(`/sales/${result.id}`);
   }
 
   return (
-    <Sheet
+    <Dialog
       open={open}
       onOpenChange={(next) => {
         setOpen(next);
@@ -145,17 +153,17 @@ export function NewSaleSheet({
         }
       }}
     >
-      <SheetTrigger className={triggerClassName}>{trigger}</SheetTrigger>
-      <SheetContent side="right" className="w-full overflow-y-auto sm:max-w-xl">
-        <SheetHeader>
-          <SheetTitle>New sale</SheetTitle>
-        </SheetHeader>
+      <DialogTrigger className={triggerClassName}>{trigger}</DialogTrigger>
+      <DialogContent className="flex max-h-[85vh] flex-col overflow-y-auto sm:max-w-2xl">
+        <DialogHeader>
+          <DialogTitle>New Sale</DialogTitle>
+        </DialogHeader>
         <form
           onSubmit={handleSubmit(onSubmit)}
-          className="flex flex-col gap-4 px-4 pb-6"
+          className="flex flex-col gap-4"
         >
           <div className="grid grid-cols-2 gap-3">
-            <Field label="Sale date" error={errors.sale_date?.message}>
+            <Field label="Sale Date" error={errors.sale_date?.message}>
               <Input type="date" {...register("sale_date")} />
             </Field>
             <Field label="Customer Name" error={errors.customer_name?.message}>
@@ -177,7 +185,7 @@ export function NewSaleSheet({
           {customerName.trim() && matchedCustomer && (
             <div className="grid grid-cols-2 gap-3 rounded-md border bg-muted/30 p-3 text-sm">
               <div>
-                <p className="text-xs text-muted-foreground">Contact person</p>
+                <p className="text-xs text-muted-foreground">Contact Person</p>
                 <p>{matchedCustomer.contact_person || "—"}</p>
               </div>
               <div>
@@ -197,10 +205,10 @@ export function NewSaleSheet({
 
           {customerName.trim() && !matchedCustomer && (
             <div className="grid grid-cols-2 gap-3">
-              <Field label="Contact person">
+              <Field label="Contact Person">
                 <Input {...register("customer_contact_person")} />
               </Field>
-              <Field label="Phone number">
+              <Field label="Phone Number">
                 <Input
                   type="tel"
                   {...register("customer_phone")}
@@ -217,12 +225,12 @@ export function NewSaleSheet({
 
           <div className="grid grid-cols-2 gap-3">
             <Field
-              label="Invoice number"
+              label="Invoice Number"
               error={errors.invoice_number?.message}
             >
               <Input {...register("invoice_number")} />
             </Field>
-            <Field label="Delivery note number">
+            <Field label="Delivery Note Number">
               <Input
                 placeholder="DN-00000"
                 {...register("delivery_note_number")}
@@ -240,97 +248,104 @@ export function NewSaleSheet({
                 onClick={() => append(emptyLine())}
               >
                 <Plus className="h-4 w-4" />
-                Add line
+                Add Line
               </Button>
             </div>
 
-            {fields.map((field, index) => {
-              const selectedProduct = productFor(lines[index]?.product_id ?? "");
-              const lineErrors = errors.lines?.[index];
-              return (
-                <div key={field.id} className="space-y-2 rounded-md border p-3">
-                  <div className="flex items-start justify-between gap-2">
-                    <div className="flex-1">
-                      <Controller
-                        control={control}
-                        name={`lines.${index}.product_id`}
-                        render={({ field: selectField }) => (
-                          <SearchableSelect
-                            items={productItems}
-                            value={selectField.value}
-                            onValueChange={(value) => {
-                              selectField.onChange(value);
-                              const product = productFor(value);
-                              if (
-                                product?.selling_price != null &&
-                                !lines[index]?.unit_price
-                              ) {
-                                setValue(
-                                  `lines.${index}.unit_price`,
-                                  String(product.selling_price),
-                                );
-                              }
-                            }}
-                            placeholder="Search for a product..."
-                          />
+            <div className="grid gap-3 sm:grid-cols-2">
+              {fields.map((field, index) => {
+                const selectedProduct = productFor(
+                  lines[index]?.product_id ?? "",
+                );
+                const lineErrors = errors.lines?.[index];
+                return (
+                  <div
+                    key={field.id}
+                    className="space-y-2 rounded-md border p-3"
+                  >
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="flex-1">
+                        <Controller
+                          control={control}
+                          name={`lines.${index}.product_id`}
+                          render={({ field: selectField }) => (
+                            <SearchableSelect
+                              items={productItems}
+                              value={selectField.value}
+                              onValueChange={(value) => {
+                                selectField.onChange(value);
+                                const product = productFor(value);
+                                if (
+                                  product?.selling_price != null &&
+                                  !lines[index]?.unit_price
+                                ) {
+                                  setValue(
+                                    `lines.${index}.unit_price`,
+                                    String(product.selling_price),
+                                  );
+                                }
+                              }}
+                              placeholder="Search for a product..."
+                            />
+                          )}
+                        />
+                        {lineErrors?.product_id?.message && (
+                          <p className="text-sm text-destructive">
+                            {lineErrors.product_id.message}
+                          </p>
                         )}
-                      />
-                      {lineErrors?.product_id?.message && (
-                        <p className="text-sm text-destructive">
-                          {lineErrors.product_id.message}
-                        </p>
-                      )}
-                      {selectedProduct && (
-                        <p className="mt-1 text-xs text-muted-foreground">
-                          Available: {formatQuantity(selectedProduct.stockPcs)}{" "}
-                          PCS
-                        </p>
+                        {selectedProduct && (
+                          <p className="mt-1 text-xs text-muted-foreground">
+                            Available: {formatQuantity(selectedProduct.stockPcs)}{" "}
+                            PCS
+                          </p>
+                        )}
+                      </div>
+                      {fields.length > 1 && (
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon-sm"
+                          onClick={() => remove(index)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
                       )}
                     </div>
-                    {fields.length > 1 && (
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="icon-sm"
-                        onClick={() => remove(index)}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    )}
-                  </div>
 
-                  <div className="grid grid-cols-3 gap-2">
-                    <Field
-                      label="Quantity"
-                      error={lineErrors?.quantity?.message}
-                    >
-                      <Input
-                        inputMode="decimal"
-                        {...register(`lines.${index}.quantity`)}
-                      />
-                    </Field>
-                    <Field
-                      label="Unit price"
-                      error={lineErrors?.unit_price?.message}
-                    >
-                      <Input
-                        inputMode="decimal"
-                        {...register(`lines.${index}.unit_price`)}
-                      />
-                    </Field>
-                    <Field
-                      label="Discount"
-                      error={lineErrors?.discount?.message}
-                    >
-                      <Input
-                        inputMode="decimal"
-                        {...register(`lines.${index}.discount`)}
-                      />
-                    </Field>
+                    <div className="grid grid-cols-3 gap-2">
+                      <Field
+                        label="Quantity"
+                        error={lineErrors?.quantity?.message}
+                      >
+                        <Input
+                          inputMode="decimal"
+                          {...register(`lines.${index}.quantity`)}
+                        />
+                      </Field>
+                      <Field
+                        label="Unit Price"
+                        error={lineErrors?.unit_price?.message}
+                      >
+                        <Input
+                          inputMode="decimal"
+                          {...register(`lines.${index}.unit_price`)}
+                        />
+                      </Field>
+                      <Field
+                        label="Discount"
+                        error={lineErrors?.discount?.message}
+                      >
+                        <Input
+                          inputMode="decimal"
+                          {...register(`lines.${index}.discount`)}
+                        />
+                      </Field>
+                    </div>
                   </div>
-                </div>
-              );
-            })}
+                );
+              })}
+            </div>
           </div>
 
           <div className="grid grid-cols-3 gap-3">
@@ -338,12 +353,12 @@ export function NewSaleSheet({
               <Input inputMode="decimal" {...register("tax_percent")} />
             </Field>
             <Field
-              label="Advance payment"
+              label="Advance Payment"
               error={errors.advance_amount?.message}
             >
               <Input inputMode="decimal" {...register("advance_amount")} />
             </Field>
-            <Field label="Payment method">
+            <Field label="Payment Method">
               <Input
                 placeholder="Cash, bank transfer..."
                 {...register("advance_payment_method")}
@@ -365,17 +380,17 @@ export function NewSaleSheet({
               <span>{formatCurrency(taxAmount)}</span>
             </div>
             <div className="flex items-center justify-between text-base font-semibold">
-              <span>Grand total</span>
+              <span>Grand Total</span>
               <span>{formatCurrency(grandTotal)}</span>
             </div>
             {advanceAmount > 0 && (
               <>
                 <div className="flex items-center justify-between text-muted-foreground">
-                  <span>Advance paid</span>
+                  <span>Advance Paid</span>
                   <span>{formatCurrency(advanceAmount)}</span>
                 </div>
                 <div className="flex items-center justify-between font-medium">
-                  <span>Balance due</span>
+                  <span>Balance Due</span>
                   <span>{formatCurrency(balanceDue)}</span>
                 </div>
               </>
@@ -386,13 +401,13 @@ export function NewSaleSheet({
             <p className="text-sm text-destructive">{formError}</p>
           )}
 
-          <SheetFooter className="px-0">
+          <DialogFooter>
             <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting ? "Saving..." : "Save sale"}
+              {isSubmitting ? "Saving..." : "Save Sale"}
             </Button>
-          </SheetFooter>
+          </DialogFooter>
         </form>
-      </SheetContent>
-    </Sheet>
+      </DialogContent>
+    </Dialog>
   );
 }

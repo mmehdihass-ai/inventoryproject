@@ -82,7 +82,7 @@ export function ProductForm({ product }: { product?: Product | null }) {
         <Field label="Item Number" error={errors.sku?.message}>
           <Input {...register("sku")} />
         </Field>
-        <Field label="Model number" error={errors.model_number?.message}>
+        <Field label="Model Number" error={errors.model_number?.message}>
           <Input {...register("model_number")} />
         </Field>
       </div>
@@ -125,16 +125,16 @@ export function ProductForm({ product }: { product?: Product | null }) {
         <Field label="SQM/CTN" error={errors.sqm_per_carton?.message}>
           <Input inputMode="decimal" {...register("sqm_per_carton")} />
         </Field>
-        <Field label="Cost price (AED)" error={errors.cost_price?.message}>
+        <Field label="Cost Price (AED)" error={errors.cost_price?.message}>
           <Input inputMode="decimal" {...register("cost_price")} />
         </Field>
         <Field
-          label="Selling price (AED)"
+          label="Selling Price (AED)"
           error={errors.selling_price?.message}
         >
           <Input inputMode="decimal" {...register("selling_price")} />
         </Field>
-        <Field label="Reorder level" error={errors.reorder_level?.message}>
+        <Field label="Reorder Level" error={errors.reorder_level?.message}>
           <Input inputMode="decimal" {...register("reorder_level")} />
         </Field>
       </div>
@@ -168,8 +168,8 @@ export function ProductForm({ product }: { product?: Product | null }) {
           {isSubmitting
             ? "Saving..."
             : isEditing
-              ? "Save changes"
-              : "Create product"}
+              ? "Save Changes"
+              : "Create Product"}
         </Button>
       </div>
     </form>

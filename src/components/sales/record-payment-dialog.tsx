@@ -82,11 +82,11 @@ export function RecordPaymentDialog({
     >
       <DialogTrigger render={<Button variant="outline" size="sm" />}>
         <Wallet className="h-4 w-4" />
-        Record payment
+        Record Payment
       </DialogTrigger>
       <DialogContent className="sm:max-w-sm">
         <DialogHeader>
-          <DialogTitle>Record payment — {invoiceNumber}</DialogTitle>
+          <DialogTitle>Record Payment — {invoiceNumber}</DialogTitle>
         </DialogHeader>
 
         <form
@@ -96,19 +96,19 @@ export function RecordPaymentDialog({
         >
           {balanceDue > 0 && (
             <p className="text-sm text-muted-foreground">
-              Balance due: {balanceDue.toFixed(2)} AED
+              Balance Due: {balanceDue.toFixed(2)} AED
             </p>
           )}
           <Field label="Amount" error={errors.amount?.message}>
             <Input inputMode="decimal" {...register("amount")} />
           </Field>
-          <Field label="Payment method">
+          <Field label="Payment Method">
             <Input
               placeholder="Cash, bank transfer..."
               {...register("payment_method")}
             />
           </Field>
-          <Field label="Paid on" error={errors.paid_on?.message}>
+          <Field label="Paid On" error={errors.paid_on?.message}>
             <Input type="date" {...register("paid_on")} />
           </Field>
           <Field label="Notes">
@@ -125,7 +125,7 @@ export function RecordPaymentDialog({
             form="record-payment-form"
             disabled={isSubmitting}
           >
-            {isSubmitting ? "Saving..." : "Save payment"}
+            {isSubmitting ? "Saving..." : "Save Payment"}
           </Button>
         </DialogFooter>
       </DialogContent>

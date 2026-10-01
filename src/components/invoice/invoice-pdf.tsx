@@ -184,11 +184,11 @@ export function InvoicePdf({ data }: { data: InvoiceData }) {
             <Text>{formatCurrency(sale.grand_total)}</Text>
           </View>
           <View style={styles.totalsRow}>
-            <Text style={styles.muted}>Amount paid</Text>
+            <Text style={styles.muted}>Amount Paid</Text>
             <Text>{formatCurrency(paidTotal)}</Text>
           </View>
           <View style={styles.totalsStrong}>
-            <Text>Balance due</Text>
+            <Text>Balance Due</Text>
             <Text>{formatCurrency(balanceDue)}</Text>
           </View>
         </View>

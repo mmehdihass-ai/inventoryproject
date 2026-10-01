@@ -198,7 +198,7 @@ export function ReturnDialog({
             />
           </Field>
 
-          <Field label="Original sale (optional)">
+          <Field label="Original Sale (Optional)">
             <Controller
               control={control}
               name="original_sale_id"
@@ -271,7 +271,7 @@ export function ReturnDialog({
             <Field label="Quantity" error={errors.quantity?.message}>
               <Input inputMode="decimal" {...register("quantity")} />
             </Field>
-            <Field label="Return date" error={errors.return_date?.message}>
+            <Field label="Return Date" error={errors.return_date?.message}>
               <Input type="date" {...register("return_date")} />
             </Field>
           </div>
@@ -298,7 +298,7 @@ export function ReturnDialog({
             <Label htmlFor="restock">Restock this quantity</Label>
           </div>
 
-          <Field label="Refund amount (AED, optional)" error={errors.refund_amount?.message}>
+          <Field label="Refund Amount (AED, Optional)" error={errors.refund_amount?.message}>
             <Input inputMode="decimal" {...register("refund_amount")} />
           </Field>
 

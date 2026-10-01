@@ -108,7 +108,7 @@ export function AdjustmentDialog({
       <DialogTrigger className={triggerClassName}>{trigger}</DialogTrigger>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Inventory adjustment</DialogTitle>
+          <DialogTitle>Inventory Adjustment</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div className="grid grid-cols-2 gap-3">
@@ -126,8 +126,8 @@ export function AdjustmentDialog({
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="IN">Increase stock</SelectItem>
-                      <SelectItem value="OUT">Decrease stock</SelectItem>
+                      <SelectItem value="IN">Increase Stock</SelectItem>
+                      <SelectItem value="OUT">Decrease Stock</SelectItem>
                     </SelectContent>
                   </Select>
                 )}

@@ -137,9 +137,9 @@ export function InvoiceDocument({ data }: { data: InvoiceData }) {
             value={formatCurrency(sale.grand_total)}
             strong
           />
-          <Row label="Amount paid" value={formatCurrency(paidTotal)} />
+          <Row label="Amount Paid" value={formatCurrency(paidTotal)} />
           <Row
-            label="Balance due"
+            label="Balance Due"
             value={formatCurrency(balanceDue)}
             strong
           />

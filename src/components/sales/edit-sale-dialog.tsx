@@ -9,13 +9,13 @@ import { Pencil, Plus, Trash2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
-  Sheet,
-  SheetContent,
-  SheetFooter,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -137,7 +137,7 @@ export function EditSaleDialog({
   }
 
   return (
-    <Sheet
+    <Dialog
       open={open}
       onOpenChange={(next) => {
         setOpen(next);
@@ -147,24 +147,24 @@ export function EditSaleDialog({
         }
       }}
     >
-      <SheetTrigger render={<Button variant="outline" size="sm" />}>
+      <DialogTrigger render={<Button variant="outline" size="sm" />}>
         <Pencil className="h-4 w-4" />
         Edit
-      </SheetTrigger>
-      <SheetContent side="right" className="w-full overflow-y-auto sm:max-w-xl">
-        <SheetHeader>
-          <SheetTitle>Edit invoice {sale.invoice_number}</SheetTitle>
-        </SheetHeader>
+      </DialogTrigger>
+      <DialogContent className="flex max-h-[85vh] flex-col overflow-y-auto sm:max-w-2xl">
+        <DialogHeader>
+          <DialogTitle>Edit Invoice {sale.invoice_number}</DialogTitle>
+        </DialogHeader>
         <form
           onSubmit={handleSubmit(onSubmit)}
-          className="flex flex-col gap-4 px-4 pb-6"
+          className="flex flex-col gap-4"
         >
           <div className="grid grid-cols-2 gap-3">
-            <Field label="Sale date" error={errors.sale_date?.message}>
+            <Field label="Sale Date" error={errors.sale_date?.message}>
               <Input type="date" {...register("sale_date")} />
             </Field>
             <Field
-              label="Invoice number"
+              label="Invoice Number"
               error={errors.invoice_number?.message}
             >
               <Input {...register("invoice_number")} />
@@ -172,7 +172,7 @@ export function EditSaleDialog({
           </div>
 
           <div className="grid grid-cols-2 gap-3">
-            <Field label="Delivery note number">
+            <Field label="Delivery Note Number">
               <Input {...register("delivery_note_number")} />
             </Field>
             <Field label="Tax %" error={errors.tax_percent?.message}>
@@ -190,97 +190,104 @@ export function EditSaleDialog({
                 onClick={() => append(emptyLine())}
               >
                 <Plus className="h-4 w-4" />
-                Add line
+                Add Line
               </Button>
             </div>
 
-            {fields.map((field, index) => {
-              const selectedProduct = productFor(lines[index]?.product_id ?? "");
-              const lineErrors = errors.lines?.[index];
-              return (
-                <div key={field.id} className="space-y-2 rounded-md border p-3">
-                  <div className="flex items-start justify-between gap-2">
-                    <div className="flex-1">
-                      <Controller
-                        control={control}
-                        name={`lines.${index}.product_id`}
-                        render={({ field: selectField }) => (
-                          <SearchableSelect
-                            items={productItems}
-                            value={selectField.value}
-                            onValueChange={(value) => {
-                              selectField.onChange(value);
-                              const product = productFor(value);
-                              if (
-                                product?.selling_price != null &&
-                                !lines[index]?.unit_price
-                              ) {
-                                setValue(
-                                  `lines.${index}.unit_price`,
-                                  String(product.selling_price),
-                                );
-                              }
-                            }}
-                            placeholder="Search for a product..."
-                          />
+            <div className="grid gap-3 sm:grid-cols-2">
+              {fields.map((field, index) => {
+                const selectedProduct = productFor(
+                  lines[index]?.product_id ?? "",
+                );
+                const lineErrors = errors.lines?.[index];
+                return (
+                  <div
+                    key={field.id}
+                    className="space-y-2 rounded-md border p-3"
+                  >
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="flex-1">
+                        <Controller
+                          control={control}
+                          name={`lines.${index}.product_id`}
+                          render={({ field: selectField }) => (
+                            <SearchableSelect
+                              items={productItems}
+                              value={selectField.value}
+                              onValueChange={(value) => {
+                                selectField.onChange(value);
+                                const product = productFor(value);
+                                if (
+                                  product?.selling_price != null &&
+                                  !lines[index]?.unit_price
+                                ) {
+                                  setValue(
+                                    `lines.${index}.unit_price`,
+                                    String(product.selling_price),
+                                  );
+                                }
+                              }}
+                              placeholder="Search for a product..."
+                            />
+                          )}
+                        />
+                        {lineErrors?.product_id?.message && (
+                          <p className="text-sm text-destructive">
+                            {lineErrors.product_id.message}
+                          </p>
                         )}
-                      />
-                      {lineErrors?.product_id?.message && (
-                        <p className="text-sm text-destructive">
-                          {lineErrors.product_id.message}
-                        </p>
-                      )}
-                      {selectedProduct && (
-                        <p className="mt-1 text-xs text-muted-foreground">
-                          Available: {formatQuantity(selectedProduct.stockPcs)}{" "}
-                          PCS
-                        </p>
+                        {selectedProduct && (
+                          <p className="mt-1 text-xs text-muted-foreground">
+                            Available: {formatQuantity(selectedProduct.stockPcs)}{" "}
+                            PCS
+                          </p>
+                        )}
+                      </div>
+                      {fields.length > 1 && (
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon-sm"
+                          onClick={() => remove(index)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
                       )}
                     </div>
-                    {fields.length > 1 && (
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="icon-sm"
-                        onClick={() => remove(index)}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    )}
-                  </div>
 
-                  <div className="grid grid-cols-3 gap-2">
-                    <Field
-                      label="Quantity"
-                      error={lineErrors?.quantity?.message}
-                    >
-                      <Input
-                        inputMode="decimal"
-                        {...register(`lines.${index}.quantity`)}
-                      />
-                    </Field>
-                    <Field
-                      label="Unit price"
-                      error={lineErrors?.unit_price?.message}
-                    >
-                      <Input
-                        inputMode="decimal"
-                        {...register(`lines.${index}.unit_price`)}
-                      />
-                    </Field>
-                    <Field
-                      label="Discount"
-                      error={lineErrors?.discount?.message}
-                    >
-                      <Input
-                        inputMode="decimal"
-                        {...register(`lines.${index}.discount`)}
-                      />
-                    </Field>
+                    <div className="grid grid-cols-3 gap-2">
+                      <Field
+                        label="Quantity"
+                        error={lineErrors?.quantity?.message}
+                      >
+                        <Input
+                          inputMode="decimal"
+                          {...register(`lines.${index}.quantity`)}
+                        />
+                      </Field>
+                      <Field
+                        label="Unit Price"
+                        error={lineErrors?.unit_price?.message}
+                      >
+                        <Input
+                          inputMode="decimal"
+                          {...register(`lines.${index}.unit_price`)}
+                        />
+                      </Field>
+                      <Field
+                        label="Discount"
+                        error={lineErrors?.discount?.message}
+                      >
+                        <Input
+                          inputMode="decimal"
+                          {...register(`lines.${index}.discount`)}
+                        />
+                      </Field>
+                    </div>
                   </div>
-                </div>
-              );
-            })}
+                );
+              })}
+            </div>
           </div>
 
           <Field label="Notes">
@@ -297,7 +304,7 @@ export function EditSaleDialog({
               <span>{formatCurrency(taxAmount)}</span>
             </div>
             <div className="flex items-center justify-between text-base font-semibold">
-              <span>Grand total</span>
+              <span>Grand Total</span>
               <span>{formatCurrency(grandTotal)}</span>
             </div>
           </div>
@@ -306,13 +313,13 @@ export function EditSaleDialog({
             <p className="text-sm text-destructive">{formError}</p>
           )}
 
-          <SheetFooter className="px-0">
+          <DialogFooter>
             <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting ? "Saving..." : "Save changes"}
+              {isSubmitting ? "Saving..." : "Save Changes"}
             </Button>
-          </SheetFooter>
+          </DialogFooter>
         </form>
-      </SheetContent>
-    </Sheet>
+      </DialogContent>
+    </Dialog>
   );
 }

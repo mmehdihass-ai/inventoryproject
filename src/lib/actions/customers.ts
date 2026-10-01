@@ -1,14 +1,13 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import {
   customerPayloadSchema,
   type CustomerPayload,
 } from "@/lib/validation/customer";
 
-type ActionResult = { error: string } | undefined;
+type ActionResult = { error: string } | { id: string };
 
 export async function createCustomer(
   payload: CustomerPayload,
@@ -22,7 +21,7 @@ export async function createCustomer(
   }
 
   revalidatePath("/customers");
-  redirect(`/customers/${parsed.id}`);
+  return { id: parsed.id };
 }
 
 export async function updateCustomer(
@@ -42,5 +41,5 @@ export async function updateCustomer(
 
   revalidatePath("/customers");
   revalidatePath(`/customers/${id}`);
-  redirect(`/customers/${id}`);
+  return { id };
 }
