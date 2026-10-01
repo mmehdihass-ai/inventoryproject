@@ -105,7 +105,7 @@ export function CustomerFormDialog({
         )}
         {isEditing ? "Edit Customer" : "New Customer"}
       </DialogTrigger>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-5xl">
         <DialogHeader>
           <DialogTitle>
             {isEditing ? "Edit Customer" : "New Customer"}

@@ -13,7 +13,7 @@ export default async function EditProductPage(
   }
 
   return (
-    <div className="space-y-4">
+    <div className="mx-auto w-full max-w-5xl space-y-4">
       <h1 className="font-heading text-2xl font-semibold tracking-tight">
         Edit {product.sku}
       </h1>

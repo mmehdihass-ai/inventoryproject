@@ -106,7 +106,7 @@ export function AdjustmentDialog({
       }}
     >
       <DialogTrigger className={triggerClassName}>{trigger}</DialogTrigger>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-5xl">
         <DialogHeader>
           <DialogTitle>Inventory Adjustment</DialogTitle>
         </DialogHeader>

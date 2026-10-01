@@ -15,6 +15,7 @@ import {
 import { cn } from "@/lib/utils";
 import { UserMenu } from "@/components/layout/user-menu";
 import { EnvSwitcher } from "@/components/layout/env-switcher";
+import { GlobalSearch } from "@/components/layout/global-search";
 import type { SupabaseEnv } from "@/lib/env-config";
 import { COMPANY_NAME } from "@/lib/company";
 
@@ -40,7 +41,7 @@ export function TopHeader({
   return (
     <header className="bg-sidebar text-sidebar-foreground">
       <div className="flex h-16 items-center justify-between gap-4 px-6">
-        <div className="flex min-w-0 items-center gap-2.5">
+        <div className="flex min-w-0 shrink-0 items-center gap-2.5">
           <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
             <Boxes className="h-4 w-4" />
           </span>
@@ -50,6 +51,9 @@ export function TopHeader({
           >
             {COMPANY_NAME}
           </h1>
+        </div>
+        <div className="hidden flex-1 justify-center md:flex">
+          <GlobalSearch />
         </div>
         <div className="flex shrink-0 items-center gap-2">
           <EnvSwitcher env={env} />
