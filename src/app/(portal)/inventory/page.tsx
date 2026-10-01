@@ -6,6 +6,7 @@ import { ProductTable } from "@/components/products/product-table";
 import { Pagination } from "@/components/ui/pagination";
 import { StockInDialog } from "@/components/transactions/stock-in-dialog";
 import { AdjustmentDialog } from "@/components/transactions/adjustment-dialog";
+import { ProductImportDialog } from "@/components/products/product-import-dialog";
 import {
   listCategories,
   listProductsWithStock,
@@ -69,8 +70,9 @@ export default async function InventoryPage(props: PageProps<"/inventory">) {
             render={<Link href="/inventory/new" />}
           >
             <Plus className="h-4 w-4" />
-            New product
+            New Product
           </Button>
+          <ProductImportDialog />
           <StockInDialog
             products={allActiveProducts}
             triggerClassName={buttonVariants({ size: "sm" })}
