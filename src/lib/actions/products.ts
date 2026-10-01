@@ -47,15 +47,18 @@ export async function updateProduct(
   redirect(`/inventory/${id}`);
 }
 
-// Returns which of the given Item Numbers already exist in the inventory
-// (regardless of active/deleted state — sku is unique across all of it).
+// Returns which of the given Item Numbers already exist among non-deleted
+// products. A soft-deleted product's Item Number is free for reuse (see
+// migration 0014) — its own history stays intact under its own id either
+// way, so it doesn't count as "existing" here.
 export async function checkExistingSkus(skus: string[]): Promise<string[]> {
   if (skus.length === 0) return [];
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("products")
     .select("sku")
-    .in("sku", skus);
+    .in("sku", skus)
+    .is("deleted_at", null);
 
   if (error) throw error;
   return data.map((row) => row.sku);
@@ -95,6 +98,7 @@ export async function importProducts(
       .from("products")
       .select("id")
       .eq("sku", parsed.sku)
+      .is("deleted_at", null)
       .maybeSingle();
 
     if (lookupError) {
