@@ -14,6 +14,7 @@ import {
 import { ProductPhoto } from "@/components/products/product-photo";
 import { InvoiceStatusBadge } from "@/components/sales/invoice-status-badge";
 import { RecordPaymentDialog } from "@/components/sales/record-payment-dialog";
+import { EditSaleDialog } from "@/components/sales/edit-sale-dialog";
 import { getSaleById } from "@/lib/queries/sales";
 import { listPaymentsForSale } from "@/lib/queries/payments";
 import { formatCurrency, formatQuantity } from "@/lib/utils";
@@ -60,6 +61,7 @@ export default async function SaleDetailPage(
           </p>
         </div>
         <div className="flex items-center gap-2">
+          <EditSaleDialog sale={sale} />
           <Button
             variant="outline"
             size="sm"

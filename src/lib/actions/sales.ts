@@ -4,8 +4,10 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import {
+  editSaleFormSchema,
   paymentFormSchema,
   saleFormSchema,
+  type EditSaleFormValues,
   type PaymentFormValues,
   type SaleFormValues,
 } from "@/lib/validation/sale";
@@ -68,6 +70,31 @@ export async function createSale(
   revalidatePath("/transactions");
   revalidatePath("/customers");
   redirect(`/sales/${data.id}`);
+}
+
+export async function updateSaleDetails(
+  saleId: string,
+  values: EditSaleFormValues,
+): Promise<ActionResult> {
+  const parsed = editSaleFormSchema.parse(values);
+  const supabase = await createClient();
+
+  const { error } = await supabase.rpc("fn_update_sale_details", {
+    p_sale_id: saleId,
+    p_sale_date: parsed.sale_date,
+    p_invoice_number: parsed.invoice_number.trim(),
+    p_delivery_note_number: toNullable(parsed.delivery_note_number),
+    p_tax_percent: parsed.tax_percent.trim() === "" ? 0 : Number(parsed.tax_percent),
+    p_notes: toNullable(parsed.notes),
+  });
+
+  if (error) {
+    return { error: friendlyError(error, parsed.invoice_number) };
+  }
+
+  revalidatePath("/sales");
+  revalidatePath(`/sales/${saleId}`);
+  revalidatePath(`/invoices/${saleId}`);
 }
 
 export async function recordPayment(

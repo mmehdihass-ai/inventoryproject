@@ -35,6 +35,16 @@ export const saleFormSchema = z.object({
 
 export type SaleFormValues = z.infer<typeof saleFormSchema>;
 
+export const editSaleFormSchema = z.object({
+  sale_date: z.string().min(1, "Date is required"),
+  invoice_number: z.string().min(1, "Invoice number is required"),
+  delivery_note_number: z.string(),
+  tax_percent: nonNegativeNumericString,
+  notes: z.string(),
+});
+
+export type EditSaleFormValues = z.infer<typeof editSaleFormSchema>;
+
 export const paymentFormSchema = z.object({
   amount: requiredPositiveNumericString,
   payment_method: z.string(),
