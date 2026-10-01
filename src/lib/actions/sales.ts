@@ -19,6 +19,17 @@ function toNullable(value: string): string | null {
   return trimmed === "" ? null : trimmed;
 }
 
+// The form collects a discount percentage; fn_record_sale/fn_update_sale
+// (and sale_items.discount) still store a flat amount for the line.
+function toFlatDiscount(
+  quantity: number,
+  unitPrice: number,
+  discountPercent: string,
+): number {
+  const percent = discountPercent.trim() === "" ? 0 : Number(discountPercent);
+  return Math.round(quantity * unitPrice * (percent / 100) * 100) / 100;
+}
+
 function friendlyError(error: { code?: string; message: string }, invoice: string) {
   if (error.code === "23505") {
     return `Invoice "${invoice}" is already in use.`;
@@ -32,12 +43,16 @@ export async function createSale(
   const parsed = saleFormSchema.parse(values);
   const supabase = await createClient();
 
-  const lines = parsed.lines.map((line) => ({
-    product_id: line.product_id,
-    quantity: Number(line.quantity),
-    unit_price: Number(line.unit_price),
-    discount: line.discount.trim() === "" ? 0 : Number(line.discount),
-  }));
+  const lines = parsed.lines.map((line) => {
+    const quantity = Number(line.quantity);
+    const unitPrice = Number(line.unit_price);
+    return {
+      product_id: line.product_id,
+      quantity,
+      unit_price: unitPrice,
+      discount: toFlatDiscount(quantity, unitPrice, line.discount),
+    };
+  });
 
   const { data, error } = await supabase.rpc("fn_record_sale", {
     p_customer_name: parsed.customer_name.trim(),
@@ -79,12 +94,16 @@ export async function updateSale(
   const parsed = editSaleFormSchema.parse(values);
   const supabase = await createClient();
 
-  const lines = parsed.lines.map((line) => ({
-    product_id: line.product_id,
-    quantity: Number(line.quantity),
-    unit_price: Number(line.unit_price),
-    discount: line.discount.trim() === "" ? 0 : Number(line.discount),
-  }));
+  const lines = parsed.lines.map((line) => {
+    const quantity = Number(line.quantity);
+    const unitPrice = Number(line.unit_price);
+    return {
+      product_id: line.product_id,
+      quantity,
+      unit_price: unitPrice,
+      discount: toFlatDiscount(quantity, unitPrice, line.discount),
+    };
+  });
 
   const { error } = await supabase.rpc("fn_update_sale", {
     p_sale_id: saleId,

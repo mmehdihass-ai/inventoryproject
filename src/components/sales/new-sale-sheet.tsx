@@ -119,18 +119,52 @@ export function NewSaleSheet({
   const taxPercent = Number(watch("tax_percent")) || 0;
   const advanceAmount = Number(watch("advance_amount")) || 0;
 
+  // Total quantity requested per product across every line in this form —
+  // two lines for the same product both need to fit within its stock.
+  const requestedByProduct: Record<string, number> = {};
+  for (const line of lines) {
+    if (!line.product_id) continue;
+    requestedByProduct[line.product_id] =
+      (requestedByProduct[line.product_id] ?? 0) + (Number(line.quantity) || 0);
+  }
+
+  function sellPriceFor(unitPrice: number, discountPercent: number) {
+    return unitPrice * (1 - discountPercent / 100);
+  }
+
   const subtotal = lines.reduce((sum, line) => {
     const qty = Number(line.quantity) || 0;
     const price = Number(line.unit_price) || 0;
-    const discount = Number(line.discount) || 0;
-    return sum + (qty * price - discount);
+    const discountPercent = Number(line.discount) || 0;
+    return sum + qty * sellPriceFor(price, discountPercent);
   }, 0);
   const taxAmount = Math.round(subtotal * (taxPercent / 100) * 100) / 100;
   const grandTotal = subtotal + taxAmount;
   const balanceDue = grandTotal - advanceAmount;
 
+  function stockErrors(values: SaleFormValues): string | null {
+    const requested: Record<string, number> = {};
+    for (const line of values.lines) {
+      if (!line.product_id) continue;
+      requested[line.product_id] =
+        (requested[line.product_id] ?? 0) + (Number(line.quantity) || 0);
+    }
+    for (const [productId, quantity] of Object.entries(requested)) {
+      const product = productFor(productId);
+      if (product && quantity > product.stockPcs) {
+        return `${product.sku} — ${product.description}: requested ${formatQuantity(quantity)} PCS, only ${formatQuantity(product.stockPcs)} PCS available`;
+      }
+    }
+    return null;
+  }
+
   async function onSubmit(values: SaleFormValues) {
     setFormError(null);
+    const stockError = stockErrors(values);
+    if (stockError) {
+      setFormError(stockError);
+      return;
+    }
     const result = await createSale(values);
     if ("error" in result) {
       setFormError(result.error);
@@ -154,7 +188,7 @@ export function NewSaleSheet({
       }}
     >
       <DialogTrigger className={triggerClassName}>{trigger}</DialogTrigger>
-      <DialogContent className="flex max-h-[85vh] flex-col overflow-y-auto sm:max-w-2xl">
+      <DialogContent className="flex max-h-[85vh] w-full flex-col overflow-y-auto sm:max-w-5xl">
         <DialogHeader>
           <DialogTitle>New Sale</DialogTitle>
         </DialogHeader>
@@ -252,100 +286,114 @@ export function NewSaleSheet({
               </Button>
             </div>
 
-            <div className="grid gap-3 sm:grid-cols-2">
-              {fields.map((field, index) => {
-                const selectedProduct = productFor(
-                  lines[index]?.product_id ?? "",
-                );
-                const lineErrors = errors.lines?.[index];
-                return (
-                  <div
-                    key={field.id}
-                    className="space-y-2 rounded-md border p-3"
-                  >
-                    <div className="flex items-start justify-between gap-2">
-                      <div className="flex-1">
-                        <Controller
-                          control={control}
-                          name={`lines.${index}.product_id`}
-                          render={({ field: selectField }) => (
-                            <SearchableSelect
-                              items={productItems}
-                              value={selectField.value}
-                              onValueChange={(value) => {
-                                selectField.onChange(value);
-                                const product = productFor(value);
-                                if (
-                                  product?.selling_price != null &&
-                                  !lines[index]?.unit_price
-                                ) {
-                                  setValue(
-                                    `lines.${index}.unit_price`,
-                                    String(product.selling_price),
-                                  );
-                                }
-                              }}
-                              placeholder="Search for a product..."
-                            />
-                          )}
-                        />
-                        {lineErrors?.product_id?.message && (
-                          <p className="text-sm text-destructive">
-                            {lineErrors.product_id.message}
-                          </p>
+            {fields.map((field, index) => {
+              const selectedProduct = productFor(
+                lines[index]?.product_id ?? "",
+              );
+              const lineErrors = errors.lines?.[index];
+              const requestedTotal = selectedProduct
+                ? requestedByProduct[selectedProduct.id] ?? 0
+                : 0;
+              const exceedsStock =
+                selectedProduct != null &&
+                requestedTotal > selectedProduct.stockPcs;
+              const unitPrice = Number(lines[index]?.unit_price) || 0;
+              const discountPercent = Number(lines[index]?.discount) || 0;
+              const sellPrice = sellPriceFor(unitPrice, discountPercent);
+              return (
+                <div
+                  key={field.id}
+                  className="space-y-2 rounded-md border p-3"
+                >
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex-1">
+                      <Controller
+                        control={control}
+                        name={`lines.${index}.product_id`}
+                        render={({ field: selectField }) => (
+                          <SearchableSelect
+                            items={productItems}
+                            value={selectField.value}
+                            onValueChange={(value) => {
+                              selectField.onChange(value);
+                              const product = productFor(value);
+                              if (product?.selling_price != null) {
+                                setValue(
+                                  `lines.${index}.unit_price`,
+                                  String(product.selling_price),
+                                );
+                              }
+                            }}
+                            placeholder="Search for a product..."
+                          />
                         )}
-                        {selectedProduct && (
-                          <p className="mt-1 text-xs text-muted-foreground">
-                            Available: {formatQuantity(selectedProduct.stockPcs)}{" "}
-                            PCS
-                          </p>
-                        )}
-                      </div>
-                      {fields.length > 1 && (
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="icon-sm"
-                          onClick={() => remove(index)}
+                      />
+                      {lineErrors?.product_id?.message && (
+                        <p className="text-sm text-destructive">
+                          {lineErrors.product_id.message}
+                        </p>
+                      )}
+                      {selectedProduct && (
+                        <p
+                          className={`mt-1 text-xs ${exceedsStock ? "font-medium text-destructive" : "text-muted-foreground"}`}
                         >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
+                          Available: {formatQuantity(selectedProduct.stockPcs)}{" "}
+                          PCS
+                          {exceedsStock && " — exceeds available stock"}
+                        </p>
                       )}
                     </div>
-
-                    <div className="grid grid-cols-3 gap-2">
-                      <Field
-                        label="Quantity"
-                        error={lineErrors?.quantity?.message}
+                    {fields.length > 1 && (
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon-sm"
+                        onClick={() => remove(index)}
                       >
-                        <Input
-                          inputMode="decimal"
-                          {...register(`lines.${index}.quantity`)}
-                        />
-                      </Field>
-                      <Field
-                        label="Unit Price"
-                        error={lineErrors?.unit_price?.message}
-                      >
-                        <Input
-                          inputMode="decimal"
-                          {...register(`lines.${index}.unit_price`)}
-                        />
-                      </Field>
-                      <Field
-                        label="Discount"
-                        error={lineErrors?.discount?.message}
-                      >
-                        <Input
-                          inputMode="decimal"
-                          {...register(`lines.${index}.discount`)}
-                        />
-                      </Field>
-                    </div>
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    )}
                   </div>
-                );
-              })}
-            </div>
+
+                  <div className="grid grid-cols-4 gap-2">
+                    <Field
+                      label="Quantity"
+                      error={lineErrors?.quantity?.message}
+                    >
+                      <Input
+                        inputMode="decimal"
+                        {...register(`lines.${index}.quantity`)}
+                      />
+                    </Field>
+                    <Field
+                      label="Unit Price"
+                      error={lineErrors?.unit_price?.message}
+                    >
+                      <Input
+                        inputMode="decimal"
+                        {...register(`lines.${index}.unit_price`)}
+                      />
+                    </Field>
+                    <Field
+                      label="Discount %"
+                      error={lineErrors?.discount?.message}
+                    >
+                      <Input
+                        inputMode="decimal"
+                        {...register(`lines.${index}.discount`)}
+                      />
+                    </Field>
+                    <Field label="Sell Price">
+                      <Input
+                        readOnly
+                        disabled
+                        value={formatCurrency(sellPrice)}
+                      />
+                    </Field>
+                  </div>
+                </div>
+              );
+            })}
           </div>
 
           <div className="grid grid-cols-3 gap-3">

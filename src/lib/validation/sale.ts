@@ -10,11 +10,20 @@ const nonNegativeNumericString = z.string().refine(
   { error: "Must be 0 or more" },
 );
 
+const percentString = z.string().refine(
+  (v) =>
+    v.trim() === "" ||
+    (!Number.isNaN(Number(v)) && Number(v) >= 0 && Number(v) <= 100),
+  { error: "Must be between 0 and 100" },
+);
+
 export const saleLineSchema = z.object({
   product_id: z.string().min(1, "Select a product"),
   quantity: requiredPositiveNumericString,
   unit_price: requiredPositiveNumericString,
-  discount: nonNegativeNumericString,
+  // A percentage, not a flat amount — converted to a flat discount before
+  // it reaches fn_record_sale/fn_update_sale, which still store a flat sum.
+  discount: percentString,
 });
 
 export const saleFormSchema = z.object({
