@@ -11,6 +11,7 @@ import {
   listCategories,
   listProductsWithStock,
   listProductsWithStockPaged,
+  type ProductSortKey,
 } from "@/lib/queries/products";
 import type { StockStatus } from "@/lib/inventory";
 
@@ -20,6 +21,22 @@ const STOCK_STATUS_VALUES: StockStatus[] = [
   "IN_STOCK",
   "LOW_STOCK",
   "OUT_OF_STOCK",
+];
+
+const SORT_KEYS: ProductSortKey[] = [
+  "vendor_name",
+  "sku",
+  "description",
+  "size_specification",
+  "unit",
+  "category",
+  "stock",
+  "pcs_per_carton",
+  "kg_per_carton",
+  "kg_per_pallet",
+  "sqm_per_carton",
+  "balance_sqm",
+  "balance_box",
 ];
 
 export default async function InventoryPage(props: PageProps<"/inventory">) {
@@ -38,6 +55,12 @@ export default async function InventoryPage(props: PageProps<"/inventory">) {
     ? (stockParam as StockStatus)
     : undefined;
   const page = Math.max(1, Number(searchParams.page) || 1);
+  const sortParam =
+    typeof searchParams.sort === "string" ? searchParams.sort : undefined;
+  const sortKey = SORT_KEYS.includes(sortParam as ProductSortKey)
+    ? (sortParam as ProductSortKey)
+    : undefined;
+  const sortDir = searchParams.dir === "desc" ? "desc" : "asc";
 
   const [
     { rows: products, totalCount, totalPages, page: currentPage },
@@ -54,6 +77,7 @@ export default async function InventoryPage(props: PageProps<"/inventory">) {
       },
       page,
       PAGE_SIZE,
+      sortKey ? { key: sortKey, dir: sortDir } : undefined,
     ),
     listCategories(),
     listProductsWithStock({ active: true }),

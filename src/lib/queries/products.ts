@@ -74,18 +74,80 @@ export async function listProductsWithStock(
   return withStock;
 }
 
+export type ProductSortKey =
+  | "vendor_name"
+  | "sku"
+  | "description"
+  | "size_specification"
+  | "unit"
+  | "category"
+  | "stock"
+  | "pcs_per_carton"
+  | "kg_per_carton"
+  | "kg_per_pallet"
+  | "sqm_per_carton"
+  | "balance_sqm"
+  | "balance_box";
+
+const SORT_ACCESSORS: Record<
+  ProductSortKey,
+  (p: ProductWithStock) => string | number | null
+> = {
+  vendor_name: (p) => p.vendor_name,
+  sku: (p) => p.sku,
+  description: (p) => p.description,
+  size_specification: (p) => p.size_specification,
+  unit: (p) => p.unit,
+  category: (p) => p.category,
+  stock: (p) => p.stockPcs,
+  pcs_per_carton: (p) => p.pcs_per_carton,
+  kg_per_carton: (p) => p.kg_per_carton,
+  kg_per_pallet: (p) => p.kg_per_pallet,
+  sqm_per_carton: (p) => p.sqm_per_carton,
+  balance_sqm: (p) => p.stockSqm,
+  balance_box: (p) => p.stockCarton,
+};
+
+// Nulls always sort last, regardless of direction — a product missing a
+// conversion factor (e.g. no SQM/CTN) shouldn't jump to the top on desc.
+function sortProducts(
+  products: ProductWithStock[],
+  sortBy: ProductSortKey,
+  dir: "asc" | "desc",
+): ProductWithStock[] {
+  const accessor = SORT_ACCESSORS[sortBy];
+  if (!accessor) return products;
+  const sign = dir === "desc" ? -1 : 1;
+
+  return [...products].sort((a, b) => {
+    const av = accessor(a);
+    const bv = accessor(b);
+    if (av == null && bv == null) return 0;
+    if (av == null) return 1;
+    if (bv == null) return -1;
+    if (typeof av === "string" && typeof bv === "string") {
+      return sign * av.localeCompare(bv);
+    }
+    return sign * ((av as number) - (bv as number));
+  });
+}
+
 // The Inventory list page's dedicated paginated entry point. Everything
 // else (pickers, dashboard, reports) keeps calling listProductsWithStock
 // directly and gets the full matching set — stock status is a derived,
 // in-memory filter (see above), so it has to run before pagination slices
-// the result, not as a query-level LIMIT/OFFSET.
+// the result, not as a query-level LIMIT/OFFSET. Sorting happens here for
+// the same reason: several sortable columns (stock, Balance SQM/Box) are
+// derived values, not plain DB columns.
 export async function listProductsWithStockPaged(
   filters: ProductListFilters & { stockStatus?: StockStatus } = {},
   page = 1,
   pageSize = 50,
+  sort?: { key: ProductSortKey; dir: "asc" | "desc" },
 ): Promise<PagedResult<ProductWithStock>> {
   const all = await listProductsWithStock(filters);
-  return paginate(all, page, pageSize);
+  const sorted = sort ? sortProducts(all, sort.key, sort.dir) : all;
+  return paginate(sorted, page, pageSize);
 }
 
 export async function getProductById(id: string): Promise<Product | null> {

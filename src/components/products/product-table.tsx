@@ -9,6 +9,7 @@ import {
 } from "@/components/ui/table";
 import { formatQuantity, formatNumber } from "@/lib/utils";
 import { DeleteProductDialog } from "@/components/products/delete-product-dialog";
+import { SortableColumnHead } from "@/components/ui/sortable-column-head";
 import type { ProductWithStock } from "@/lib/queries/products";
 
 export function ProductTable({
@@ -32,20 +33,42 @@ export function ProductTable({
         <TableHeader>
           <TableRow>
             <TableHead>No.</TableHead>
-            <TableHead>Vendor</TableHead>
-            <TableHead>Item Number</TableHead>
-            <TableHead>Description</TableHead>
-            <TableHead>Size/Dimension</TableHead>
-            <TableHead>Unit</TableHead>
-            <TableHead>Product Category</TableHead>
-            <TableHead className="text-right">Qty in Stock</TableHead>
-            <TableHead className="text-right">Qty Available</TableHead>
-            <TableHead className="text-right">PCS/CTN</TableHead>
-            <TableHead className="text-right">KG/CTN</TableHead>
-            <TableHead className="text-right">KG/Pallet</TableHead>
-            <TableHead className="text-right">SQM/CTN</TableHead>
-            <TableHead className="text-right">Balance SQM</TableHead>
-            <TableHead className="text-right">Balance Box</TableHead>
+            <SortableColumnHead sortKey="vendor_name">Vendor</SortableColumnHead>
+            <SortableColumnHead sortKey="sku">Item Number</SortableColumnHead>
+            <SortableColumnHead sortKey="description">
+              Description
+            </SortableColumnHead>
+            <SortableColumnHead sortKey="size_specification">
+              Size/Dimension
+            </SortableColumnHead>
+            <SortableColumnHead sortKey="unit">Unit</SortableColumnHead>
+            <SortableColumnHead sortKey="category">
+              Product Category
+            </SortableColumnHead>
+            <SortableColumnHead sortKey="stock" className="text-right">
+              Qty in Stock
+            </SortableColumnHead>
+            <SortableColumnHead sortKey="stock" className="text-right">
+              Qty Available
+            </SortableColumnHead>
+            <SortableColumnHead sortKey="pcs_per_carton" className="text-right">
+              PCS/CTN
+            </SortableColumnHead>
+            <SortableColumnHead sortKey="kg_per_carton" className="text-right">
+              KG/CTN
+            </SortableColumnHead>
+            <SortableColumnHead sortKey="kg_per_pallet" className="text-right">
+              KG/Pallet
+            </SortableColumnHead>
+            <SortableColumnHead sortKey="sqm_per_carton" className="text-right">
+              SQM/CTN
+            </SortableColumnHead>
+            <SortableColumnHead sortKey="balance_sqm" className="text-right">
+              Balance SQM
+            </SortableColumnHead>
+            <SortableColumnHead sortKey="balance_box" className="text-right">
+              Balance Box
+            </SortableColumnHead>
             <TableHead className="w-10" />
           </TableRow>
         </TableHeader>
