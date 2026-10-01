@@ -58,12 +58,13 @@ export default async function ProductDetailPage(
 
   return (
     <div className="space-y-6">
-      <div className="flex items-start justify-between">
-        <div className="flex items-center gap-4">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-5">
           <ProductPhoto
             src={product.photo_url}
             alt={product.description}
-            size={72}
+            size={160}
+            className="rounded-xl"
           />
           <div>
             <h1 className="font-heading text-2xl font-semibold tracking-tight">
@@ -94,7 +95,7 @@ export default async function ProductDetailPage(
           render={<Link href={`/inventory/${product.id}/edit`} />}
         >
           <Pencil className="h-4 w-4" />
-          Edit product
+          Edit Product
         </Button>
       </div>
 
@@ -111,7 +112,7 @@ export default async function ProductDetailPage(
         </Card>
       )}
 
-      <div className="grid gap-6 xl:grid-cols-2">
+      <div className="grid gap-6 xl:grid-cols-[1.6fr_1fr]">
         <div className="space-y-6">
           <Card>
             <CardContent className="flex flex-wrap items-center gap-6 pt-6">
@@ -205,7 +206,7 @@ export default async function ProductDetailPage(
 
         <div className="space-y-2">
           <h2 className="font-heading text-lg font-semibold tracking-tight">
-            Transaction history
+            Transaction History
           </h2>
           {ledger.length === 0 ? (
             <div className="rounded-md border border-dashed p-10 text-center text-sm text-muted-foreground">
