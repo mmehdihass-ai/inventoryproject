@@ -47,25 +47,39 @@ export async function updateProduct(
   redirect(`/inventory/${id}`);
 }
 
+// Returns which of the given Item Numbers already exist in the inventory
+// (regardless of active/deleted state — sku is unique across all of it).
+export async function checkExistingSkus(skus: string[]): Promise<string[]> {
+  if (skus.length === 0) return [];
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("products")
+    .select("sku")
+    .in("sku", skus);
+
+  if (error) throw error;
+  return data.map((row) => row.sku);
+}
+
 export type ImportSummary = {
   created: number;
-  updated: number;
+  skippedExisting: number;
   stockedIn: number;
   errors: { rowNumber: number; sku: string | null; message: string }[];
 };
 
-// Bulk import: inserts new products (by Item Number) or updates matching
-// existing ones. Opening Stock only applies to a brand-new product — an
-// existing one keeps its current ledger-derived stock untouched, so
-// re-importing the same sheet to update prices never double-counts stock.
-// Re-validates every row server-side; never trusts the client's parse.
+// Bulk import only ever creates new products. An Item Number that already
+// exists is skipped entirely — field values and stock on an existing
+// product are never touched by import; use Edit Product and Stock In/
+// Adjustment for those. Re-validates every row server-side; never trusts
+// the client's parse.
 export async function importProducts(
   rows: { rowNumber: number; raw: Record<string, unknown> }[],
 ): Promise<ImportSummary> {
   const supabase = await createClient();
   const summary: ImportSummary = {
     created: 0,
-    updated: 0,
+    skippedExisting: 0,
     stockedIn: 0,
     errors: [],
   };
@@ -93,21 +107,7 @@ export async function importProducts(
     }
 
     if (existing) {
-      const fields: Partial<ProductPayload> = {};
-      for (const key of parsed.providedFields) {
-        fields[key] = parsed.payload[key] as never;
-      }
-      if (Object.keys(fields).length > 0) {
-        const { error } = await supabase
-          .from("products")
-          .update(fields)
-          .eq("id", existing.id);
-        if (error) {
-          summary.errors.push({ rowNumber, sku: parsed.sku, message: error.message });
-          continue;
-        }
-      }
-      summary.updated += 1;
+      summary.skippedExisting += 1;
       continue;
     }
 

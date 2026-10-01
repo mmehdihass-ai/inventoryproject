@@ -4,7 +4,7 @@ import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import * as XLSX from "xlsx";
 import { toast } from "sonner";
-import { Upload, FileSpreadsheet, Download, CheckCircle2, XCircle } from "lucide-react";
+import { Upload, FileSpreadsheet, Download, CheckCircle2, XCircle, AlertCircle } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -23,7 +23,11 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { importProducts, type ImportSummary } from "@/lib/actions/products";
+import {
+  checkExistingSkus,
+  importProducts,
+  type ImportSummary,
+} from "@/lib/actions/products";
 import {
   parseImportRow,
   isBlankRow,
@@ -31,13 +35,18 @@ import {
   IMPORT_TEMPLATE_EXAMPLE_ROW,
 } from "@/lib/validation/product-import";
 
+const ALREADY_EXISTS_MESSAGE =
+  "Item already exists — use Stock In to update quantity";
+
+type RowStatus = "new" | "exists" | "invalid";
+
 type PreviewRow = {
   rowNumber: number;
   raw: Record<string, unknown>;
   sku: string | null;
   description: string;
-  ok: boolean;
-  error?: string;
+  status: RowStatus;
+  message?: string;
 };
 
 function downloadBlob(blob: Blob, name: string) {
@@ -72,6 +81,7 @@ export function ProductImportDialog() {
   const [fileName, setFileName] = useState<string | null>(null);
   const [rows, setRows] = useState<PreviewRow[]>([]);
   const [summary, setSummary] = useState<ImportSummary | null>(null);
+  const [isChecking, setIsChecking] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
 
   function reset() {
@@ -97,53 +107,67 @@ export function ProductImportDialog() {
       if (isBlankRow(data)) return;
       const rowNumber = index + 2; // header is row 1
       const parsed = parseImportRow(data, rowNumber);
-      if (parsed.ok) {
-        if (seenSkus.has(parsed.sku)) {
-          preview.push({
-            rowNumber,
-            raw: data,
-            sku: parsed.sku,
-            description: parsed.payload.description,
-            ok: false,
-            error: "Duplicate Item Number in this file",
-          });
-          return;
-        }
-        seenSkus.add(parsed.sku);
-        preview.push({
-          rowNumber,
-          raw: data,
-          sku: parsed.sku,
-          description: parsed.payload.description,
-          ok: true,
-        });
-      } else {
+      if (!parsed.ok) {
         preview.push({
           rowNumber,
           raw: data,
           sku: parsed.sku,
           description: "",
-          ok: false,
-          error: parsed.error,
+          status: "invalid",
+          message: parsed.error,
         });
+        return;
       }
+      if (seenSkus.has(parsed.sku)) {
+        preview.push({
+          rowNumber,
+          raw: data,
+          sku: parsed.sku,
+          description: parsed.payload.description,
+          status: "invalid",
+          message: "Duplicate Item Number in this file",
+        });
+        return;
+      }
+      seenSkus.add(parsed.sku);
+      preview.push({
+        rowNumber,
+        raw: data,
+        sku: parsed.sku,
+        description: parsed.payload.description,
+        status: "new",
+      });
     });
-    setRows(preview);
+
+    setIsChecking(true);
+    try {
+      const candidateSkus = preview
+        .filter((r) => r.status === "new" && r.sku)
+        .map((r) => r.sku as string);
+      const existing = new Set(await checkExistingSkus(candidateSkus));
+      setRows(
+        preview.map((row) =>
+          row.sku && existing.has(row.sku)
+            ? { ...row, status: "exists", message: ALREADY_EXISTS_MESSAGE }
+            : row,
+        ),
+      );
+    } finally {
+      setIsChecking(false);
+    }
   }
 
   async function handleImport() {
-    const validRows = rows.filter((r) => r.ok);
-    if (validRows.length === 0) return;
+    const newRows = rows.filter((r) => r.status === "new");
+    if (newRows.length === 0) return;
     setIsImporting(true);
     try {
       const result = await importProducts(
-        validRows.map((r) => ({ rowNumber: r.rowNumber, raw: r.raw })),
+        newRows.map((r) => ({ rowNumber: r.rowNumber, raw: r.raw })),
       );
       setSummary(result);
       if (result.errors.length === 0) {
-        toast.success(
-          `Imported ${result.created + result.updated} products`,
-        );
+        toast.success(`Imported ${result.created} products`);
       } else {
         toast.warning("Import finished with some errors");
       }
@@ -153,8 +177,9 @@ export function ProductImportDialog() {
     }
   }
 
-  const validCount = rows.filter((r) => r.ok).length;
-  const invalidCount = rows.length - validCount;
+  const newCount = rows.filter((r) => r.status === "new").length;
+  const existsCount = rows.filter((r) => r.status === "exists").length;
+  const invalidCount = rows.filter((r) => r.status === "invalid").length;
 
   return (
     <Dialog
@@ -175,13 +200,12 @@ export function ProductImportDialog() {
 
         <div className="space-y-4">
           <p className="text-sm text-muted-foreground">
-            Creates a new product for each new Item Number, or updates the
-            matching existing product otherwise — a blank cell on an
-            existing product leaves that field as it is, it won&apos;t clear
-            it. Opening Stock only applies to brand-new products — to adjust
-            an existing product&apos;s stock, use Stock In or Adjustment
-            instead. Embedded images in the file are not imported as product
-            photos.
+            Only creates new products — one per new Item Number. An Item
+            Number that already exists in the inventory is skipped entirely
+            (its fields and stock are never changed by import); use Edit
+            Product and Stock In/Adjustment for those instead. Opening Stock
+            only applies to the brand-new products created here. Embedded
+            images in the file are not imported as product photos.
           </p>
 
           <div className="flex flex-wrap items-center gap-2">
@@ -208,26 +232,36 @@ export function ProductImportDialog() {
               type="button"
               size="sm"
               onClick={() => inputRef.current?.click()}
+              disabled={isChecking}
             >
               <Upload className="h-4 w-4" />
               Choose File
             </Button>
             {fileName && (
-              <span className="text-sm text-muted-foreground">{fileName}</span>
+              <span className="text-sm text-muted-foreground">
+                {fileName}
+                {isChecking && " — checking existing items..."}
+              </span>
             )}
           </div>
 
           {rows.length > 0 && (
             <>
-              <div className="flex items-center gap-4 text-sm">
+              <div className="flex flex-wrap items-center gap-4 text-sm">
                 <span className="flex items-center gap-1.5 text-emerald-600">
                   <CheckCircle2 className="h-4 w-4" />
-                  {validCount} ready to import
+                  {newCount} ready to import
                 </span>
+                {existsCount > 0 && (
+                  <span className="flex items-center gap-1.5 text-amber-600">
+                    <AlertCircle className="h-4 w-4" />
+                    {existsCount} already exist
+                  </span>
+                )}
                 {invalidCount > 0 && (
                   <span className="flex items-center gap-1.5 text-destructive">
                     <XCircle className="h-4 w-4" />
-                    {invalidCount} skipped
+                    {invalidCount} invalid
                   </span>
                 )}
               </div>
@@ -253,11 +287,17 @@ export function ProductImportDialog() {
                         </TableCell>
                         <TableCell>{row.description || "—"}</TableCell>
                         <TableCell>
-                          {row.ok ? (
+                          {row.status === "new" && (
                             <span className="text-emerald-600">Ready</span>
-                          ) : (
+                          )}
+                          {row.status === "exists" && (
+                            <span className="text-amber-600">
+                              {row.message}
+                            </span>
+                          )}
+                          {row.status === "invalid" && (
                             <span className="text-destructive">
-                              {row.error}
+                              {row.message}
                             </span>
                           )}
                         </TableCell>
@@ -272,9 +312,11 @@ export function ProductImportDialog() {
           {summary && (
             <div className="space-y-1 rounded-md border bg-muted/30 p-3 text-sm">
               <p>
-                Created {summary.created}, updated {summary.updated}
+                Created {summary.created}
                 {summary.stockedIn > 0 &&
                   `, opening stock recorded for ${summary.stockedIn}`}
+                {summary.skippedExisting > 0 &&
+                  `. Skipped ${summary.skippedExisting} already-existing item(s)`}
                 .
               </p>
               {summary.errors.map((e) => (
@@ -290,11 +332,11 @@ export function ProductImportDialog() {
           <Button
             type="button"
             onClick={handleImport}
-            disabled={validCount === 0 || isImporting}
+            disabled={newCount === 0 || isImporting || isChecking}
           >
             {isImporting
               ? "Importing..."
-              : `Import ${validCount || ""} Product${validCount === 1 ? "" : "s"}`}
+              : `Import ${newCount || ""} Product${newCount === 1 ? "" : "s"}`}
           </Button>
         </DialogFooter>
       </DialogContent>

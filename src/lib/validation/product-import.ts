@@ -93,37 +93,12 @@ export function isBlankRow(raw: Record<string, unknown>): boolean {
   return Object.values(raw).every((v) => cellToString(v) === "");
 }
 
-// Fields an existing product can have updated from a re-imported sheet.
-// sku is excluded (it's the match key, never re-set) and photo_url/active
-// have no column at all — neither is ever touched by import.
-const UPDATABLE_FIELD_KEYS: (keyof ProductPayload)[] = [
-  "vendor_name",
-  "model_number",
-  "description",
-  "category",
-  "size_specification",
-  "colour",
-  "unit",
-  "pcs_per_carton",
-  "kg_per_carton",
-  "kg_per_pallet",
-  "sqm_per_carton",
-  "cost_price",
-  "selling_price",
-  "reorder_level",
-  "notes",
-];
-
 export type ImportRowResult =
   | {
       rowNumber: number;
       ok: true;
       sku: string;
       payload: ProductPayload;
-      // Fields whose cell was non-blank in this row — used to build a
-      // partial update for an existing product, so a blank cell means
-      // "leave this field as it is", not "clear it".
-      providedFields: (keyof ProductPayload)[];
       openingStock: number | null;
     }
   | { rowNumber: number; ok: false; sku: string | null; error: string };
@@ -167,16 +142,11 @@ export function parseImportRow(
       notes: cellToString(row.notes) || null,
       active: true,
     });
-    const providedFields = UPDATABLE_FIELD_KEYS.filter(
-      (key) => cellToString(row[key]) !== "",
-    );
-
     return {
       rowNumber,
       ok: true,
       sku,
       payload,
-      providedFields,
       openingStock: openingStock && openingStock > 0 ? openingStock : null,
     };
   } catch (err) {
