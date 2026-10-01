@@ -71,18 +71,18 @@ export default async function ProductDetailPage(
         </Card>
       )}
 
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-[300px_1fr_380px]">
+      <div className="mx-auto grid w-full max-w-6xl grid-cols-1 gap-4 lg:grid-cols-[300px_1fr_380px]">
         <div>
           <Card>
-            <CardContent className="flex items-center gap-4 pt-6">
+            <CardContent className="flex flex-col items-center gap-3 pt-6 text-center">
               <ProductPhoto
                 src={product.photo_url}
                 alt={product.description}
-                size={110}
+                size={220}
                 className="rounded-xl"
               />
               <div className="min-w-0">
-                <div className="flex flex-wrap items-center gap-2">
+                <div className="flex flex-wrap items-center justify-center gap-2">
                   <h1 className="font-heading text-xl font-semibold tracking-tight">
                     {product.sku}
                   </h1>
