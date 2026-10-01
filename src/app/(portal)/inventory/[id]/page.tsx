@@ -71,7 +71,7 @@ export default async function ProductDetailPage(
         </Card>
       )}
 
-      <div className="mx-auto grid w-full max-w-6xl grid-cols-1 gap-4 lg:grid-cols-[300px_1fr_380px]">
+      <div className="mx-auto grid w-full max-w-7xl grid-cols-1 gap-4 lg:grid-cols-[300px_1fr_480px]">
         <div>
           <Card>
             <CardContent className="flex flex-col items-center gap-3 pt-6 text-center">
