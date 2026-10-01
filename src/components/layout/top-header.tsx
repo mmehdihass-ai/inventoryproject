@@ -16,8 +16,7 @@ import { cn } from "@/lib/utils";
 import { UserMenu } from "@/components/layout/user-menu";
 import { EnvSwitcher } from "@/components/layout/env-switcher";
 import type { SupabaseEnv } from "@/lib/env-config";
-
-const COMPANY_NAME = "AL Tareeq AL Sahal Building Materials Trading FZE";
+import { COMPANY_NAME } from "@/lib/company";
 
 const NAV_ITEMS = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },

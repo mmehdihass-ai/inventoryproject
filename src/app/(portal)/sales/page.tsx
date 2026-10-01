@@ -7,6 +7,7 @@ import { NewSaleSheet } from "@/components/sales/new-sale-sheet";
 import { listSalesPaged } from "@/lib/queries/sales";
 import { listCustomers } from "@/lib/queries/customers";
 import { listProductsWithStock } from "@/lib/queries/products";
+import { listPaymentsForSales } from "@/lib/queries/payments";
 
 const PAGE_SIZE = 50;
 
@@ -29,6 +30,7 @@ export default async function SalesPage(props: PageProps<"/sales">) {
     listCustomers(),
     listProductsWithStock({ active: true }),
   ]);
+  const paymentsBySale = await listPaymentsForSales(sales.map((s) => s.id));
 
   return (
     <div className="space-y-4">
@@ -49,7 +51,7 @@ export default async function SalesPage(props: PageProps<"/sales">) {
         />
       </div>
       <SalesFilters customers={customers} />
-      <SalesTable sales={sales} />
+      <SalesTable sales={sales} paymentsBySale={paymentsBySale} />
       <Pagination
         page={currentPage}
         totalPages={totalPages}

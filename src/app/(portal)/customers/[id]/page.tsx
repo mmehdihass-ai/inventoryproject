@@ -10,6 +10,7 @@ import { ReturnsTable } from "@/components/returns/returns-table";
 import { getCustomerById } from "@/lib/queries/customers";
 import { listSales } from "@/lib/queries/sales";
 import { listReturns } from "@/lib/queries/returns";
+import { listPaymentsForSales } from "@/lib/queries/payments";
 import { formatCurrency } from "@/lib/utils";
 
 export default async function CustomerDetailPage(
@@ -26,7 +27,8 @@ export default async function CustomerDetailPage(
     listSales({ customerId: id }),
     listReturns({ customerId: id }),
   ]);
-  const totalSales = sales.reduce((sum, sale) => sum + sale.total_amount, 0);
+  const paymentsBySale = await listPaymentsForSales(sales.map((s) => s.id));
+  const totalSales = sales.reduce((sum, sale) => sum + sale.grand_total, 0);
 
   return (
     <div className="space-y-6">
@@ -70,7 +72,11 @@ export default async function CustomerDetailPage(
             Purchase history
           </h2>
           <div className="max-h-[600px] overflow-y-auto rounded-md">
-            <SalesTable sales={sales} showCustomer={false} />
+            <SalesTable
+              sales={sales}
+              paymentsBySale={paymentsBySale}
+              showCustomer={false}
+            />
           </div>
         </div>
 

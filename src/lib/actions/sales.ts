@@ -3,7 +3,12 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { saleFormSchema, type SaleFormValues } from "@/lib/validation/sale";
+import {
+  paymentFormSchema,
+  saleFormSchema,
+  type PaymentFormValues,
+  type SaleFormValues,
+} from "@/lib/validation/sale";
 
 type ActionResult = { error: string } | undefined;
 
@@ -43,6 +48,14 @@ export async function createSale(
     p_customer_phone: toNullable(parsed.customer_phone),
     p_customer_email: toNullable(parsed.customer_email),
     p_customer_address: toNullable(parsed.customer_address),
+    p_tax_percent:
+      parsed.tax_percent.trim() === "" ? 0 : Number(parsed.tax_percent),
+    p_advance_amount:
+      parsed.advance_amount.trim() === ""
+        ? null
+        : Number(parsed.advance_amount),
+    p_advance_payment_method: toNullable(parsed.advance_payment_method),
+    p_advance_paid_on: parsed.sale_date,
   });
 
   if (error) {
@@ -55,4 +68,28 @@ export async function createSale(
   revalidatePath("/transactions");
   revalidatePath("/customers");
   redirect(`/sales/${data.id}`);
+}
+
+export async function recordPayment(
+  saleId: string,
+  values: PaymentFormValues,
+): Promise<ActionResult> {
+  const parsed = paymentFormSchema.parse(values);
+  const supabase = await createClient();
+
+  const { error } = await supabase.from("payments").insert({
+    sale_id: saleId,
+    amount: Number(parsed.amount),
+    payment_method: toNullable(parsed.payment_method),
+    paid_on: parsed.paid_on,
+    notes: toNullable(parsed.notes),
+  });
+
+  if (error) {
+    return { error: error.message };
+  }
+
+  revalidatePath("/sales");
+  revalidatePath(`/sales/${saleId}`);
+  revalidatePath(`/invoices/${saleId}`);
 }

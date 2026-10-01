@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Printer, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
@@ -12,7 +12,10 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { ProductPhoto } from "@/components/products/product-photo";
+import { InvoiceStatusBadge } from "@/components/sales/invoice-status-badge";
+import { RecordPaymentDialog } from "@/components/sales/record-payment-dialog";
 import { getSaleById } from "@/lib/queries/sales";
+import { listPaymentsForSale } from "@/lib/queries/payments";
 import { formatCurrency, formatQuantity } from "@/lib/utils";
 
 export default async function SaleDetailPage(
@@ -25,25 +28,57 @@ export default async function SaleDetailPage(
     notFound();
   }
 
+  const payments = await listPaymentsForSale(id);
+  const paidTotal = payments.reduce((sum, p) => sum + p.amount, 0);
+  const balanceDue = sale.grand_total - paidTotal;
+
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="font-heading text-2xl font-semibold tracking-tight">
-          Invoice {sale.invoice_number}
-        </h1>
-        <p className="text-muted-foreground">
-          {sale.sale_date} ·{" "}
-          {sale.customer ? (
-            <Link
-              href={`/customers/${sale.customer.id}`}
-              className="hover:underline"
-            >
-              {sale.customer.customer_name}
-            </Link>
-          ) : (
-            "—"
-          )}
-        </p>
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <div className="flex items-center gap-2">
+            <h1 className="font-heading text-2xl font-semibold tracking-tight">
+              Invoice {sale.invoice_number}
+            </h1>
+            <InvoiceStatusBadge
+              grandTotal={sale.grand_total}
+              paidTotal={paidTotal}
+            />
+          </div>
+          <p className="text-muted-foreground">
+            {sale.sale_date} ·{" "}
+            {sale.customer ? (
+              <Link
+                href={`/customers/${sale.customer.id}`}
+                className="hover:underline"
+              >
+                {sale.customer.customer_name}
+              </Link>
+            ) : (
+              "—"
+            )}
+          </p>
+        </div>
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            nativeButton={false}
+            render={<Link href={`/invoices/${sale.id}`} target="_blank" />}
+          >
+            <Printer className="h-4 w-4" />
+            Print
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            nativeButton={false}
+            render={<a href={`/api/invoices/${sale.id}/pdf`} download />}
+          >
+            <Download className="h-4 w-4" />
+            Download
+          </Button>
+        </div>
       </div>
 
       <Card>
@@ -56,10 +91,16 @@ export default async function SaleDetailPage(
             label="Discount total"
             value={formatCurrency(sale.discount_total)}
           />
+          <Detail label="Subtotal" value={formatCurrency(sale.total_amount)} />
           <Detail
-            label="Sale total"
-            value={formatCurrency(sale.total_amount)}
+            label={`Tax (${formatQuantity(sale.tax_percent)}%)`}
+            value={formatCurrency(sale.tax_amount)}
           />
+          <Detail
+            label="Grand total"
+            value={formatCurrency(sale.grand_total)}
+          />
+          <Detail label="Balance due" value={formatCurrency(balanceDue)} />
         </CardContent>
       </Card>
 
@@ -125,6 +166,55 @@ export default async function SaleDetailPage(
             </TableBody>
           </Table>
         </div>
+      </div>
+
+      <div className="space-y-2">
+        <div className="flex items-center justify-between">
+          <h2 className="font-heading text-lg font-semibold tracking-tight">
+            Payments
+          </h2>
+          <RecordPaymentDialog
+            saleId={sale.id}
+            invoiceNumber={sale.invoice_number}
+            balanceDue={balanceDue}
+          />
+        </div>
+        {payments.length === 0 ? (
+          <div className="rounded-md border border-dashed p-6 text-center text-sm text-muted-foreground">
+            No payments recorded yet.
+          </div>
+        ) : (
+          <div className="rounded-md border">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="w-14">#</TableHead>
+                  <TableHead>Amount</TableHead>
+                  <TableHead>Method</TableHead>
+                  <TableHead>Paid on</TableHead>
+                  <TableHead>Notes</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {payments.map((payment, index) => (
+                  <TableRow key={payment.id}>
+                    <TableCell>{index + 1}</TableCell>
+                    <TableCell className="font-medium">
+                      {formatCurrency(payment.amount)}
+                    </TableCell>
+                    <TableCell className="text-muted-foreground">
+                      {payment.payment_method || "—"}
+                    </TableCell>
+                    <TableCell>{payment.paid_on}</TableCell>
+                    <TableCell className="text-muted-foreground">
+                      {payment.notes || "—"}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        )}
       </div>
 
       <Button

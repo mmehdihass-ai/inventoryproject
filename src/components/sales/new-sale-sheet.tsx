@@ -24,6 +24,7 @@ import { saleFormSchema, type SaleFormValues } from "@/lib/validation/sale";
 import type { ProductWithStock } from "@/lib/queries/products";
 import type { Customer } from "@/lib/types/customer";
 import { formatCurrency, formatQuantity } from "@/lib/utils";
+import { DEFAULT_TAX_PERCENT } from "@/lib/company";
 
 function today() {
   return new Date().toISOString().slice(0, 10);
@@ -43,6 +44,9 @@ function defaultValues(): SaleFormValues {
     customer_address: "",
     invoice_number: "",
     delivery_note_number: "",
+    tax_percent: String(DEFAULT_TAX_PERCENT),
+    advance_amount: "",
+    advance_payment_method: "",
     notes: "",
     lines: [emptyLine()],
   };
@@ -109,12 +113,18 @@ export function NewSaleSheet({
     return products.find((p) => p.id === id);
   }
 
-  const saleTotal = lines.reduce((sum, line) => {
+  const taxPercent = Number(watch("tax_percent")) || 0;
+  const advanceAmount = Number(watch("advance_amount")) || 0;
+
+  const subtotal = lines.reduce((sum, line) => {
     const qty = Number(line.quantity) || 0;
     const price = Number(line.unit_price) || 0;
     const discount = Number(line.discount) || 0;
     return sum + (qty * price - discount);
   }, 0);
+  const taxAmount = Math.round(subtotal * (taxPercent / 100) * 100) / 100;
+  const grandTotal = subtotal + taxAmount;
+  const balanceDue = grandTotal - advanceAmount;
 
   async function onSubmit(values: SaleFormValues) {
     setFormError(null);
@@ -323,15 +333,53 @@ export function NewSaleSheet({
             })}
           </div>
 
+          <div className="grid grid-cols-3 gap-3">
+            <Field label="Tax %" error={errors.tax_percent?.message}>
+              <Input inputMode="decimal" {...register("tax_percent")} />
+            </Field>
+            <Field
+              label="Advance payment"
+              error={errors.advance_amount?.message}
+            >
+              <Input inputMode="decimal" {...register("advance_amount")} />
+            </Field>
+            <Field label="Payment method">
+              <Input
+                placeholder="Cash, bank transfer..."
+                {...register("advance_payment_method")}
+              />
+            </Field>
+          </div>
+
           <Field label="Notes">
             <Textarea rows={2} {...register("notes")} />
           </Field>
 
-          <div className="flex items-center justify-between border-t pt-3">
-            <span className="text-sm text-muted-foreground">Sale total</span>
-            <span className="text-lg font-semibold">
-              {formatCurrency(saleTotal)}
-            </span>
+          <div className="space-y-1.5 border-t pt-3 text-sm">
+            <div className="flex items-center justify-between text-muted-foreground">
+              <span>Subtotal</span>
+              <span>{formatCurrency(subtotal)}</span>
+            </div>
+            <div className="flex items-center justify-between text-muted-foreground">
+              <span>Tax ({formatQuantity(taxPercent)}%)</span>
+              <span>{formatCurrency(taxAmount)}</span>
+            </div>
+            <div className="flex items-center justify-between text-base font-semibold">
+              <span>Grand total</span>
+              <span>{formatCurrency(grandTotal)}</span>
+            </div>
+            {advanceAmount > 0 && (
+              <>
+                <div className="flex items-center justify-between text-muted-foreground">
+                  <span>Advance paid</span>
+                  <span>{formatCurrency(advanceAmount)}</span>
+                </div>
+                <div className="flex items-center justify-between font-medium">
+                  <span>Balance due</span>
+                  <span>{formatCurrency(balanceDue)}</span>
+                </div>
+              </>
+            )}
           </div>
 
           {formError && (

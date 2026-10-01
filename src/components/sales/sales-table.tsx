@@ -1,20 +1,21 @@
-import Link from "next/link";
 import {
   Table,
   TableBody,
-  TableCell,
   TableHead,
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { formatCurrency } from "@/lib/utils";
+import { SaleRow } from "@/components/sales/sale-row";
 import type { SaleListRow } from "@/lib/queries/sales";
+import type { Payment } from "@/lib/types/sale";
 
 export function SalesTable({
   sales,
+  paymentsBySale,
   showCustomer = true,
 }: {
   sales: SaleListRow[];
+  paymentsBySale: Record<string, Payment[]>;
   showCustomer?: boolean;
 }) {
   if (sales.length === 0) {
@@ -30,32 +31,23 @@ export function SalesTable({
       <Table>
         <TableHeader>
           <TableRow>
+            <TableHead className="w-8" />
             <TableHead>Date</TableHead>
             <TableHead>Invoice</TableHead>
-            <TableHead>Delivery note</TableHead>
             {showCustomer && <TableHead>Customer</TableHead>}
             <TableHead className="text-right">Amount</TableHead>
+            <TableHead>Status</TableHead>
+            <TableHead className="text-right">Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {sales.map((sale) => (
-            <TableRow key={sale.id}>
-              <TableCell>{sale.sale_date}</TableCell>
-              <TableCell className="font-medium">
-                <Link href={`/sales/${sale.id}`} className="hover:underline">
-                  {sale.invoice_number}
-                </Link>
-              </TableCell>
-              <TableCell className="text-muted-foreground">
-                {sale.delivery_note_number ?? "—"}
-              </TableCell>
-              {showCustomer && (
-                <TableCell>{sale.customer?.customer_name ?? "—"}</TableCell>
-              )}
-              <TableCell className="text-right font-medium">
-                {formatCurrency(sale.total_amount)}
-              </TableCell>
-            </TableRow>
+            <SaleRow
+              key={sale.id}
+              sale={sale}
+              payments={paymentsBySale[sale.id] ?? []}
+              showCustomer={showCustomer}
+            />
           ))}
         </TableBody>
       </Table>
